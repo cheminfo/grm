@@ -1,0 +1,25 @@
+{
+  "name": "grm",
+  "version": "1.0.0",
+  "description": "GitHub Release Manager",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cheminfo/grm.git"
+  },
+  "keywords": [
+    "release",
+    "github",
+    "webhook",
+    "deploy"
+  ],
+  "author": "Michaël Zasso",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cheminfo/grm/issues"
+  },
+  "homepage": "https://github.com/cheminfo/grm"
+}
