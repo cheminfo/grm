@@ -16,7 +16,7 @@ const app = koa();
 
 debug('configuring app');
 
-require('./src/load')(app, config);
+require('./src/server/load')(app, config);
 
 const httpServer = http.createServer(app.callback());
 const httpPort = config.port || 3000;

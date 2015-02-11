@@ -2,7 +2,7 @@
 
 const fs = require('mz/fs');
 const path = require('path');
-const dataFolder = path.resolve(__dirname, '../../data');
+const dataFolder = path.resolve(__dirname, '../../../data');
 const configFile = path.join(dataFolder, 'config.json');
 
 module.exports = function () {
@@ -13,7 +13,7 @@ module.exports = function () {
                 yield fs.mkdir(dataFolder);
             }
             if (yield fs.exists(configFile)) {
-                var data = yield fs.readFile(configFile, 'utf-8');
+                let data = yield fs.readFile(configFile, 'utf-8');
                 this.config.data = JSON.parse(data);
             } else {
                 yield this.config.save();
