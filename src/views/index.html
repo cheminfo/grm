@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block body %}
+<p>
+    Hello {{ user.login }} !
+</p>
+<p>
+    {% for i in repos %}
+      {{ i.fullName }}<br>
+    {% endfor %}
+</p>
+{% endblock %}
