@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/cheminfo/grm",
   "dependencies": {
+    "bluebird": "^2.9.8",
     "debug": "^2.1.1",
     "koa": "^0.17.0",
     "koa-bodyparser": "^1.3.1",
@@ -32,6 +33,7 @@
     "koa-send": "^1.3.1",
     "koa-static": "^1.4.9",
     "koa-swig-render": "0.0.4",
+    "mz": "^1.2.1",
     "octokat": "^0.4.5",
     "thenify-all": "^1.6.0"
   }

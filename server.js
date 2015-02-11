@@ -1,5 +1,8 @@
 'use strict';
 
+const Promise = require('bluebird');
+global.Promise = Promise;
+
 const http = require('http');
 const https = require('https');
 const fs = require('fs');

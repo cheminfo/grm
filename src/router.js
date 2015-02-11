@@ -7,8 +7,13 @@ module.exports = function (app) {
     let router = new Router();
 
     router.get('/', function*() {
-        this.state.repos = yield this.github.getRepositories();
         yield this.render('index');
+    });
+
+    router.get('/repos', function*() {
+        this.config.data.repos = yield this.github.getRepositories(true);
+        this.config.save();
+        this.body = 'repos reloaded';
     });
 
     app.use(router.middleware());

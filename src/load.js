@@ -6,6 +6,7 @@ const mount = require('koa-mount');
 const debug = require('debug')('grm:init');
 
 const github = require('./util/github-api');
+const dynamicConfig = require('./util/dynamic-config');
 const router = require('./router');
 
 module.exports = function (app, config) {
@@ -23,8 +24,14 @@ module.exports = function (app, config) {
 
     app.context.github = github(config.oauth);
 
+    app.use(dynamicConfig());
+
     app.use(function*(next) {
-        this.state.user = yield this.github.getUser();
+        if (!this.config.data.user) {
+            var user = yield this.github.getUser();
+            this.config.data.user = user.login;
+            this.config.save();
+        }
         yield next;
     });
 
