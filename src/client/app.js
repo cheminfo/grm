@@ -1,19 +1,7 @@
 'use strict';
 
-var $ = require('jquery');
-var agent = require('superagent');
+const React = require('react');
 
-var $head = $('#head');
-var $content = $('#content');
+const Main = require('./main');
 
-agent
-    .get('/user')
-    .end(function (res) {
-        $head.html(res.body.name);
-    });
-
-agent
-    .get('/repos')
-    .end(function (res) {
-        console.log(res.body);
-    });
+React.render(<Main />, document.getElementById('main'));

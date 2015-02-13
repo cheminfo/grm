@@ -28,6 +28,7 @@ module.exports = function (app, config) {
         serve(path.resolve(__dirname, '../client/assets'))
     ));
 
+    app.context.token = config.oauth;
     app.context.github = github(config.oauth);
 
     app.use(dynamicConfig());
