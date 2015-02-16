@@ -1,11 +1,10 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
+import Repo from './repository';
 
-var Repo = require('./repository');
-
-module.exports = React.createClass({
-    render: function () {
+export default React.createClass({
+    render() {
         var repos = this.props.repos.map(function (repo) {
             return <Repo key={repo.fullName} data={repo} />;
         });

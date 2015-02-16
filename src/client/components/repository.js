@@ -1,9 +1,9 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 
-module.exports = React.createClass({
-    render: function () {
+export default React.createClass({
+    render() {
         var data = this.props.data;
         return <div>{data.fullName}</div>;
     }

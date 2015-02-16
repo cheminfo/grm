@@ -1,11 +1,10 @@
 'use strict';
 
-const React = require('react');
+import React from 'react';
+import Org from './components/organization';
 
-const Org = require('./components/organization');
-
-module.exports = React.createClass({
-    render: function () {
+export default React.createClass({
+    render() {
         var repos = this.props.repos;
         var orgs = repos.map(function (org) {
             return <Org key={org.name} name={org.name} repos={org.repos} />;

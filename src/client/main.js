@@ -1,25 +1,24 @@
 'use strict';
 
-const React = require('react');
-const agent = require('superagent');
+import React from 'react';
+import agent from 'superagent';
+import View from './view';
 
-const View = require('./view');
-
-module.exports = React.createClass({
-    getInitialState: function () {
+export default React.createClass({
+    getInitialState() {
         return {
             loading: true,
             user: '',
             repos: []
         };
     },
-    componentWillMount: function () {
+    componentWillMount() {
         this.load();
     },
-    load: function () {
+    load() {
         agent.get('/repos').end(this.gotRepos);
     },
-    gotRepos: function (res) {
+    gotRepos(res) {
         let data = res.body;
         let repos = {};
         data.repos.forEach(function (repo) {
@@ -40,7 +39,7 @@ module.exports = React.createClass({
             user: data.user
         });
     },
-    render: function () {
+    render() {
         if (this.state.loading) {
             return <div>loading...</div>;
         } else {

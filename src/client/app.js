@@ -1,7 +1,6 @@
 'use strict';
 
-const React = require('react');
-
-const Main = require('./main');
+import React from 'react';
+import Main from './main';
 
 React.render(<Main />, document.getElementById('main'));
