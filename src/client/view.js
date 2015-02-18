@@ -1,19 +1,41 @@
 'use strict';
 
 import React from 'react';
-import Org from './components/organization';
+import RepoList from './components/repo-list';
 
 export default React.createClass({
+    getInitialState() {
+        return {
+            visible: false
+        };
+    },
+    switchVisible() {
+        this.setState({
+            visible: !this.state.visible
+        });
+    },
     render() {
         var repos = this.props.repos;
-        var orgs = repos.map(function (org) {
-            return <Org key={org.name} name={org.name} repos={org.repos} />;
-        });
-        return (
-            <div>
-                <h2>Hello {this.props.user.name} !</h2>
-                <div>{orgs}</div>
-            </div>
-        );
+        var owners = Object.keys(repos);
+        if (owners.length === 0) {
+            return (
+                <div>
+                    No repository found
+                </div>
+            );
+        } else {
+            return (
+                <div>
+                    <div>
+                        <label><input type="checkbox" onClick={this.switchVisible} /> show all repositories</label>
+                    </div>
+                    {owners.map(function (owner) {
+                        return (
+                            <RepoList visible={this.state.visible} key={owner} owner={owner} repos={repos[owner]} />
+                        );
+                    }, this)}
+                </div>
+            );
+        }
     }
 });

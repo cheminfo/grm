@@ -2,48 +2,38 @@
 
 import React from 'react';
 import agent from 'superagent';
+
+import Username from './components/username';
 import View from './view';
 
 export default React.createClass({
     getInitialState() {
         return {
-            loading: true,
-            user: '',
-            repos: []
+            username: '',
+            repos: {}
         };
     },
     componentWillMount() {
-        this.load();
-    },
-    load() {
-        agent.get('/repos').end(this.gotRepos);
-    },
-    gotRepos(res) {
-        let data = res.body;
-        let repos = {};
-        data.repos.forEach(function (repo) {
-            let owner = repo.owner.login;
-            if (!repos[owner]) repos[owner] = [];
-            repos[owner].push(repo);
-        });
-        var orgs = [];
-        for(var i in repos) {
-            orgs.push({
-                name: i,
-                repos: repos[i]
+        agent.get('/username').end(res => {
+            this.setState({
+                username: res.text
             });
-        }
-        this.setState({
-            loading: false,
-            repos: orgs,
-            user: data.user
+        });
+        this.loadRepos();
+    },
+    loadRepos() {
+        agent.get('/repos').end(res => {
+            this.setState({
+                repos: res.body
+            });
         });
     },
     render() {
-        if (this.state.loading) {
-            return <div>loading...</div>;
-        } else {
-            return <View user={this.state.user} repos={this.state.repos} />;
-        }
+        return (
+            <div>
+                <Username name={this.state.username} />
+                <View repos={this.state.repos} />
+            </div>
+        );
     }
 });

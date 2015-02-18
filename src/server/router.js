@@ -3,35 +3,48 @@
 const Router = require('koa-router');
 const Git = require('./util/git');
 
+const mongo = require('./util/mongo');
+
 module.exports = function (app) {
 
     let router = new Router();
 
-    router.get('/user', function*() {
-        if (!this.config.data.user) {
-            let user = yield this.github.getUser();
-            this.config.data.user = {
-                name: user.login
-            };
-            this.config.save();
-        }
-        this.body = {
-            name: this.config.data.user
-        };
+    router.get('/username', function*() {
+        var user = yield this.github.getUser();
+        this.body = user.login;
     });
 
     router.get('/repos', function*() {
-        let user = yield this.github.getUser();
-        let repos = yield this.github.getRepositories(!!this.query.force);
-        this.config.data.user = {
-            name: user.login
-        };
-        this.config.data.repos = repos;
-        this.config.save();
-        this.body = {
-            user: this.config.data.user,
-            repos: this.config.data.repos
-        };
+        var ghRepos = yield this.github.getRepositories();
+        var mongoRepos = yield mongo.collection('repos').find();
+        var repos = {};
+        for (let i = 0; i < mongoRepos.length; i++) {
+            let repo = mongoRepos[i];
+            if (!repos[repo.owner]) repos[repo.owner] = [];
+            repos[repo.owner].push({
+                local: true,
+                repo: repo
+            });
+        }
+        loop1: for (let i = 0; i < ghRepos.length; i++) {
+            let repo = ghRepos[i];
+            let owner = repo.owner.login;
+            if (!repos[owner]) repos[owner] = [];
+            var arr = repos[owner];
+            for (let j = 0; j < arr.length; j++) {
+                if (arr[j].repo.name === repo.name) {
+                    continue loop1;
+                }
+            }
+            arr.push({
+                local: false,
+                repo: {
+                    owner: owner,
+                    name: repo.name
+                }
+            });
+        }
+        this.body = repos;
     });
 
     router.get('/repo/:org/:repo', function*() {

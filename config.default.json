@@ -5,5 +5,10 @@
     "key": "/path/to/server.key",
     "cert": "/path/to/server.crt"
   },
-  "oauth": "TOKEN"
+  "oauth": "TOKEN",
+  "mongodb": {
+    "host": "localhost",
+    "port": 27017,
+    "db": "grm"
+  }
 }
