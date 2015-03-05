@@ -9,7 +9,6 @@ const DB = require('mongodb-next');
 
 const mongo = require('./util/mongo');
 const github = require('./util/github-api');
-const dynamicConfig = require('./util/dynamic-config');
 const router = require('./router');
 
 const index = path.resolve(__dirname, '../client/index.html');
@@ -49,8 +48,6 @@ module.exports = function (app, config) {
 
         app.context.token = config.oauth;
         app.context.github = gh;
-
-        app.use(dynamicConfig());
 
         router(app);
     }

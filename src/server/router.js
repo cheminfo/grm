@@ -1,8 +1,8 @@
 'use strict';
 
 const Router = require('koa-router');
-const Git = require('./util/git');
 
+const repoManager = require('./controllers/repo-manager');
 const mongo = require('./util/mongo');
 
 module.exports = function (app) {
@@ -47,15 +47,7 @@ module.exports = function (app) {
         this.body = repos;
     });
 
-    router.get('/repo/:org/:repo', function*() {
-        let git = new Git(encodeURIComponent(this.params.org), encodeURIComponent(this.params.repo), this.token);
-        try {
-            yield git.build();
-        } catch(e) {
-            return this.body = `Impossible to pull ${this.params.org}/${this.params.repo}`;
-        }
-        this.body = 'OK';
-    });
+    router.all('/repo/:owner/:repo', repoManager);
 
     app.use(router.middleware());
 

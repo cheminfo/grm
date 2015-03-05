@@ -43,3 +43,7 @@ EnhancedOctokat.prototype.getUser = function () {
         return user;
     });
 };
+
+EnhancedOctokat.prototype.getRepo = function (org, repo) {
+    return this.octokat.repos(org, repo);
+};

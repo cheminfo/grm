@@ -10,5 +10,9 @@
     "host": "localhost",
     "port": 27017,
     "db": "grm"
+  },
+  "dir": {
+    "cdn": "/path/to/cdn",
+    "git": "/path/to/git"
   }
 }

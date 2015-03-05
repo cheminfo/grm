@@ -4,8 +4,12 @@ const child_process = require('mz/child_process');
 const fs = require('mz/fs');
 const mkdirp = require('mkdirp-then');
 const path = require('path');
+const co = require('co');
 
-const dataFolder = path.resolve(__dirname, '../../../data');
+const debug = require('debug')('grm:git');
+
+const config = require('../../../config.json');
+const dataFolder = path.resolve(config.dir.git);
 
 function Git(org, repo, OAuthToken) {
     this.org = org;
@@ -24,41 +28,84 @@ function Git(org, repo, OAuthToken) {
     this.tasks = {};
 }
 
-function initRepo() {
-    var self = this;
-    return fs.exists(path.join(self.repoDir, '.git')).then(function (exist) {
-        if (!exist) {
-            return mkdirp(self.repoDir).then(function () {
-                return child_process
-                    .execFile('git', ['init'], self.execOptions);
-            });
-        }
-    });
+function*initRepo() {
+    var exist = yield fs.exists(path.join(this.repoDir, '.git'));
+    if (!exist) {
+        debug(`Repo ${this.org}/${this.repo} does not exist, cloning`);
+        yield mkdirp(this.orgDir);
+        yield child_process.execFile('git', ['clone', this.gitUrl], {cwd: this.orgDir});
+        debug('clone successful');
+    }
 }
 Git.prototype.init = makeTask('init', initRepo, true);
 
-function pullRepo() {
-    var self = this;
-    return this.init().then(function () {
-        return child_process
-            .execFile('git', ['pull', self.gitUrl], self.execOptions);
-    });
+function*pullRepo() {
+    yield this.init();
+    debug('pulling from GitHub');
+    yield child_process.execFile('git', ['pull'], this.execOptions);
 }
 Git.prototype.pull = makeTask('pull', pullRepo);
 
-function doBuild() {
-    var self = this;
-    return this.pull().then(function () {
-        return child_process.execFile('npm', ['update'], self.execOptions)
-            .then(function () {
-                return child_process
-                    .execFile('npm', ['run', 'build'], self.execOptions);
-            });
+function*doBuild() {
+    yield this.pull();
+    debug('building project');
+    yield child_process.execFile('npm', ['install'], this.execOptions);
+    yield child_process.execFile('npm', ['run', 'build'], this.execOptions);
+    debug('build finished, getting list of files');
+    var buildDir = path.join(this.repoDir, 'dist');
+    var buildFiles = yield fs.readdir(buildDir);
+    return buildFiles.map(function (file) {
+        return {
+            name: file,
+            path: path.join(buildDir, file)
+        };
     });
 }
 Git.prototype.build = makeTask('build', doBuild);
 
-Git.prototype.task = function (name, executor, onlyOnce) {
+function*doPublish(files, message) {
+    yield this.pull();
+    debug(`publishing : ${message}`);
+    yield child_process.execFile('git', ['add'].concat(files), this.execOptions);
+    yield child_process.execFile('git', ['commit', '-m', message], this.execOptions);
+    yield child_process.execFile('git', ['push'], this.execOptions);
+    console.log('publish finished');
+}
+Git.prototype.publish = makeTask('publish', doPublish);
+
+function*doReadPkg() {
+    yield this.pull();
+    debug('reading package files');
+    var result = {
+        node: null,
+        bower: null
+    };
+    var packageNode = path.join(this.repoDir, 'package.json');
+    if (yield fs.exists(packageNode)) {
+        result.node = JSON.parse(yield fs.readFile(packageNode, 'utf-8'));
+        debug('found package.json');
+    }
+    var packageBower = path.join(this.repoDir, 'bower.json');
+    if (yield fs.exists(packageBower)) {
+        result.bower = JSON.parse(yield fs.readFile(packageBower, 'utf-8'));
+        debug('found bower.json');
+    }
+    return result;
+}
+Git.prototype.readPkg = makeTask('readPkg', doReadPkg);
+
+function*doWritePkg(pkg) {
+    debug('writing package files');
+    if (pkg.node) {
+        yield fs.writeFile(path.join(this.repoDir, 'package.json'), JSON.stringify(pkg.node, null, '  '));
+    }
+    if (pkg.bower) {
+        yield fs.writeFile(path.join(this.repoDir, 'bower.json'), JSON.stringify(pkg.bower, null, '  '));
+    }
+}
+Git.prototype.writePkg = makeTask('writePkg', doWritePkg);
+
+Git.prototype.task = function (name, executor, onlyOnce, args) {
     var task = this.tasks[name];
     if (task) {
         if (task === true) {
@@ -68,17 +115,21 @@ Git.prototype.task = function (name, executor, onlyOnce) {
         }
     } else {
         var self = this;
-        this.tasks[name] = executor.call(this).then(function (result) {
+        this.tasks[name] = executor.apply(this, args).then(function (result) {
             self.tasks[name] = !!onlyOnce;
             return result;
+        }, function (e) {
+            self.tasks[name] = false;
+            throw e;
         });
         return this.tasks[name];
     }
 };
 
 function makeTask(name, executor, onlyOnce) {
+    executor = co.wrap(executor);
     return function () {
-        return this.task(name, executor, onlyOnce);
+        return this.task(name, executor, onlyOnce, arguments);
     };
 }
 
