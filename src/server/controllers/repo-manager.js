@@ -21,7 +21,7 @@ module.exports = function*() {
     var repo = this.state.repo = this.params.repo;
     this.state.fullName = `${owner}/${repo}`;
 
-    this.state.mongoRepo = mongo.collection('repo');
+    this.state.mongoRepo = mongo.collection('repos');
 
     var action = this.query.action;
     if (!action) {
@@ -30,7 +30,10 @@ module.exports = function*() {
     }
     switch (action) {
         case 'status':
-            this.body = yield getStatus.call(this);
+            this.body = yield this.state.mongoRepo.findOne({
+                owner: this.state.owner,
+                name: this.state.repo
+            });
             break;
         case 'enable':
             this.body = yield enable.call(this);
@@ -52,18 +55,6 @@ module.exports = function*() {
     }
     this.body = 'OK';*/
 };
-
-// Returns the status of a repository
-function*getStatus() {
-    var status = yield this.state.mongoRepo.findOne({
-        owner: this.state.owner,
-        repo: this.state.repo
-    });
-    return {
-        local: !!status,
-        repo: status
-    };
-}
 
 function*enable() {
     var status = yield getStatus.call(this);

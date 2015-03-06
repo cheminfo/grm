@@ -6,19 +6,18 @@ import Repo from './repository';
 
 export default React.createClass({
     render() {
-        var repos = [];
-        for (let i = 0; i < this.props.repos.length; i++) {
+        var l = this.props.repos.length;
+        var repos = new Array(l);
+        for (let i = 0; i < l; i++) {
             var repo = this.props.repos[i];
-            if (this.props.visible || repo.local) {
-                repos.push(
-                    <Repo key={repo.repo.name} local={repo.local} data={repo.repo} />
-                );
-            }
+            repos[i] = (
+                <Repo visible={this.props.visible} key={repo.name} repo={repo} />
+            );
         }
         return (
             <div>
                 <h3>{this.props.owner}</h3>
-                <div>{repos.length ? repos : 'No repo to show'}</div>
+                <table>{repos}</table>
             </div>
         );
     }

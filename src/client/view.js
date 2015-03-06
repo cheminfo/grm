@@ -15,7 +15,13 @@ export default React.createClass({
         });
     },
     render() {
-        var repos = this.props.repos;
+        var allRepos = this.props.repos;
+        var repos = {};
+        for (let i = 0; i < allRepos.length; i++) {
+            let repo = allRepos[i];
+            if (!repos[repo.owner]) repos[repo.owner] = [];
+            repos[repo.owner].push(repo);
+        }
         var owners = Object.keys(repos);
         if (owners.length === 0) {
             return (
@@ -27,7 +33,7 @@ export default React.createClass({
             return (
                 <div>
                     <div>
-                        <label><input type="checkbox" onClick={this.switchVisible} /> show all repositories</label>
+                        <label><input type="checkbox" onChange={this.switchVisible} /> show all repositories</label>
                     </div>
                     {owners.map(function (owner) {
                         return (

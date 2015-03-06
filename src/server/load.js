@@ -22,14 +22,7 @@ module.exports = function (app, config) {
 
     debug('connecting to MongoDB');
 
-    return mongodb.connect.then(loadInfo).then(installMiddleware);
-
-    function loadInfo() {
-        debug('loading info from GitHub');
-        return gh.getUser().then(function () {
-            return gh.getRepositories();
-        });
-    }
+    return mongodb.connect.then(installMiddleware);
 
     function installMiddleware() {
         debug('installing middlewares');
