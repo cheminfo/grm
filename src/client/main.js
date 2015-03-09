@@ -14,7 +14,7 @@ export default React.createClass({
         };
     },
     componentWillMount() {
-        agent.get('/username').end(res => {
+        agent.get('username').end(res => {
             this.setState({
                 username: res.text
             });
@@ -22,7 +22,7 @@ export default React.createClass({
         this.loadRepos();
     },
     loadRepos() {
-        agent.get('/repos').end(res => {
+        agent.get('repos').end(res => {
             this.setState({
                 repos: res.body
             });

@@ -12,7 +12,7 @@ export default React.createClass({
     },
     componentDidMount() {
         agent
-            .get(`/repo/${this.props.repo.owner}/${this.props.repo.name}?action=status`)
+            .get(`repo/${this.props.repo.owner}/${this.props.repo.name}?action=status`)
             .end(res => {
                 var body = res.body;
                 body.loading = false;
@@ -26,7 +26,7 @@ export default React.createClass({
             locked: true
         });
         agent
-            .get(`/repo/${this.state.owner}/${this.state.name}?action=enable`)
+            .get(`repo/${this.state.owner}/${this.state.name}?action=enable`)
             .end(res => {
                 res.body.locked = false;
                 this.setState(res.body);
@@ -46,7 +46,7 @@ export default React.createClass({
             locked: true
         });
         agent
-            .get(`/repo/${this.state.owner}/${this.state.name}?action=publish&bump=${inc}`)
+            .get(`repo/${this.state.owner}/${this.state.name}?action=publish&bump=${inc}`)
             .end(res => {
                 res.body.locked = false;
                 this.setState(res.body);
