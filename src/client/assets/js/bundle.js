@@ -20962,11 +20962,15 @@ module.exports = React.createClass({
                 username: res.text
             });
         });
-        this.loadRepos();
+        this.loadRepos(false);
     },
-    loadRepos: function loadRepos() {
+    loadRepos: function loadRepos(force) {
         var _this = this;
-        agent.get("repos").end(function (res) {
+        var url = "repos";
+        if (force) {
+            url += "?force=true";
+        }
+        agent.get(url).end(function (res) {
             _this.setState({
                 repos: res.body
             });
@@ -20977,7 +20981,7 @@ module.exports = React.createClass({
             "div",
             null,
             React.createElement(Username, { name: this.state.username }),
-            React.createElement(View, { repos: this.state.repos })
+            React.createElement(View, { repos: this.state.repos, reload: this.loadRepos.bind(this, true) })
         );
     }
 });
@@ -21030,7 +21034,14 @@ module.exports = React.createClass({
                         null,
                         React.createElement("input", { type: "checkbox", onChange: this.switchVisible }),
                         " show all repositories"
-                    )
+                    ),
+                    " (",
+                    React.createElement(
+                        "a",
+                        { onClick: this.props.reload, href: "#", title: "reload list from GitHub" },
+                        "reload"
+                    ),
+                    ")"
                 ),
                 owners.map(function (owner) {
                     return React.createElement(RepoList, { visible: this.state.visible, key: owner, owner: owner, repos: repos[owner] });
