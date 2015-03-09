@@ -19,10 +19,14 @@ export default React.createClass({
                 username: res.text
             });
         });
-        this.loadRepos();
+        this.loadRepos(false);
     },
-    loadRepos() {
-        agent.get('repos').end(res => {
+    loadRepos(force) {
+        var url = 'repos';
+        if (force) {
+            url += '?force=true';
+        }
+        agent.get(url).end(res => {
             this.setState({
                 repos: res.body
             });
@@ -32,7 +36,7 @@ export default React.createClass({
         return (
             <div>
                 <Username name={this.state.username} />
-                <View repos={this.state.repos} />
+                <View repos={this.state.repos} reload={this.loadRepos.bind(this, true)} />
             </div>
         );
     }
