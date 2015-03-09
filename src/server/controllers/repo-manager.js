@@ -30,10 +30,7 @@ module.exports = function*() {
     }
     switch (action) {
         case 'status':
-            this.body = yield this.state.mongoRepo.findOne({
-                owner: this.state.owner,
-                name: this.state.repo
-            });
+            this.body = yield getStatus.call(this);
             break;
         case 'enable':
             this.body = yield enable.call(this);
@@ -46,29 +43,40 @@ module.exports = function*() {
             this.body = 'Unknown action: ' + action;
     }
 
-    /*);
-
-    try {
-        yield git.build();
-    } catch(e) {
-        return this.body = `Impossible to pull ${this.params.org}/${this.params.repo}`;
-    }
-    this.body = 'OK';*/
 };
+
+function*getStatus() {
+    var status = yield this.state.mongoRepo.findOne({
+        owner: this.state.owner,
+        name: this.state.repo
+    });
+    if (status.active) {
+        var git = getGit.call(this);
+        var pkg = yield git.readPkg();
+        status.version = pkg.node.version;
+    }
+    return status;
+}
 
 function*enable() {
     var status = yield getStatus.call(this);
-    if (status.local) {
-        return 'Already enabled';
-    } else {
+    if (!status.active) {
+        // make sure that the repo is cloned
         var git = getGit.call(this);
-        yield git.pull();
-        yield this.state.mongoRepo.insert({
-            owner: this.state.owner,
-            repo: this.state.repo
-        });
-        return 'Enabled';
+        var pkg = yield git.readPkg();
+        if (!pkg.node) {
+            this.throw('No node version number');
+        }
+        status.version = pkg.node.version;
     }
+    // invert the status
+    status.active = !status.active;
+    debug(`switching repo ${this.state.owner}/${this.state.repo} : ${status.active}`);
+    yield this.state.mongoRepo.findOne({
+        owner: this.state.owner,
+        name: this.state.repo
+    }).set('active', status.active);
+    return status;
 }
 
 function*publish() {

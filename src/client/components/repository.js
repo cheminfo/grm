@@ -22,12 +22,11 @@ export default React.createClass({
             });
     },
     switchEnable() {
-        console.log('TODO switchenable');
-        /*agent
-            .get(`/repo/${data.owner}/${data.name}?action=enable`)
-            .end(function (res) {
-
-            });*/
+        agent
+            .get(`/repo/${this.state.owner}/${this.state.name}?action=enable`)
+            .end(res => {
+                this.setState(res.body);
+            });
     },
     releasePatch() {
         this.release('patch');
