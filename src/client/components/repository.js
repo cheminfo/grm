@@ -22,9 +22,13 @@ export default React.createClass({
             });
     },
     switchEnable() {
+        this.setState({
+            locked: true
+        });
         agent
             .get(`/repo/${this.state.owner}/${this.state.name}?action=enable`)
             .end(res => {
+                res.body.locked = false;
                 this.setState(res.body);
             });
     },
@@ -38,7 +42,15 @@ export default React.createClass({
         this.release('major');
     },
     release(inc) {
-        console.log('TODO release ' + inc);
+        this.setState({
+            locked: true
+        });
+        agent
+            .get(`/repo/${this.state.owner}/${this.state.name}?action=publish&bump=${inc}`)
+            .end(res => {
+                res.body.locked = false;
+                this.setState(res.body);
+            });
     },
     render() {
         var active = this.state.active;
@@ -59,7 +71,7 @@ export default React.createClass({
             );
         } else {
             var checked = active ? 'checked' : null;
-
+            var locked = this.state.locked;
             if (active) {
                 var version = this.state.version;
                 var sversion = semver(version);
@@ -72,7 +84,7 @@ export default React.createClass({
                 return (
                     <tr>
                         <td>
-                            <input type="checkbox" checked={checked}
+                            <input type="checkbox" checked={checked} disabled={locked}
                                    onChange={this.switchEnable}/>
                         </td>
                         <td>
@@ -83,11 +95,11 @@ export default React.createClass({
                         </td>
                         <td>
                             <input type="button" value={patch}
-                                   onClick={this.releasePatch}/>
+                                   onClick={this.releasePatch} disabled={locked} />
                             <input type="button" value={minor}
-                                   onClick={this.releaseMinor}/>
+                                   onClick={this.releaseMinor} disabled={locked} />
                             <input type="button" value={major}
-                                   onClick={this.releaseMajor}/>
+                                   onClick={this.releaseMajor} disabled={locked} />
                         </td>
                     </tr>
                 );
@@ -95,7 +107,7 @@ export default React.createClass({
                 return (
                     <tr>
                         <td>
-                            <input type="checkbox" checked={checked}
+                            <input type="checkbox" checked={checked} disabled={locked}
                                    onChange={this.switchEnable}/>
                         </td>
                         <td>

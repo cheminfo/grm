@@ -140,7 +140,7 @@ function*publish() {
         }
         yield fs.writeFile(path.join(cdnDir2, buildFiles[i].name), file);
     }
-    return 'OK';
+    return yield getStatus.call(this);
 }
 
 function getGit() {
