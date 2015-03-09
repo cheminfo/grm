@@ -69,7 +69,7 @@ function*doPublish(files, message) {
     yield child_process.execFile('git', ['add'].concat(files), this.execOptions);
     yield child_process.execFile('git', ['commit', '-m', message], this.execOptions);
     yield child_process.execFile('git', ['push'], this.execOptions);
-    console.log('publish finished');
+    debug('publish finished');
 }
 Git.prototype.publish = makeTask('publish', doPublish);
 
