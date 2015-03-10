@@ -20808,23 +20808,28 @@ module.exports = React.createClass({
             _this.setState(res.body);
         });
     },
-    releasePatch: function releasePatch() {
-        this.release("patch");
-    },
-    releaseMinor: function releaseMinor() {
-        this.release("minor");
-    },
-    releaseMajor: function releaseMajor() {
-        this.release("major");
-    },
     release: function release(inc) {
+        var _this = this;
+        var v = semver(this.state.version);
+        v.inc(inc);
+        var confirm = window.confirm("Bump " + this.props.repo.name + " to v" + v.version + "?");
+        if (confirm) {
+            this.setState({
+                locked: true
+            });
+            agent.get("repo/" + this.state.owner + "/" + this.state.name + "?action=publish&bump=" + inc).end(function (res) {
+                res.body.locked = false;
+                _this.setState(res.body);
+            });
+        }
+    },
+    npmPublish: function npmPublish() {
         var _this = this;
         this.setState({
             locked: true
         });
-        agent.get("repo/" + this.state.owner + "/" + this.state.name + "?action=publish&bump=" + inc).end(function (res) {
-            res.body.locked = false;
-            _this.setState(res.body);
+        agent.get("repo/" + this.state.owner + "/" + this.state.name + "?action=npm").end(function () {
+            _this.setState({ locked: false });
         });
     },
     render: function render() {
@@ -20860,6 +20865,8 @@ module.exports = React.createClass({
                 var minor = sversion.version;
                 sversion.inc("major");
                 var major = sversion.version;
+                var name = this.props.repo.name;
+                var owner = this.props.repo.owner;
                 return React.createElement(
                     "tr",
                     null,
@@ -20872,7 +20879,7 @@ module.exports = React.createClass({
                     React.createElement(
                         "td",
                         null,
-                        this.props.repo.name
+                        name
                     ),
                     React.createElement(
                         "td",
@@ -20884,11 +20891,22 @@ module.exports = React.createClass({
                         "td",
                         null,
                         React.createElement("input", { type: "button", value: patch,
-                            onClick: this.releasePatch, disabled: locked }),
+                            onClick: this.release.bind(this, "patch"), disabled: locked }),
                         React.createElement("input", { type: "button", value: minor,
-                            onClick: this.releaseMinor, disabled: locked }),
+                            onClick: this.release.bind(this, "minor"), disabled: locked }),
                         React.createElement("input", { type: "button", value: major,
-                            onClick: this.releaseMajor, disabled: locked })
+                            onClick: this.release.bind(this, "major"), disabled: locked }),
+                        React.createElement("input", { type: "button", value: "NPM",
+                            onClick: this.npmPublish, disabled: locked })
+                    ),
+                    React.createElement(
+                        "td",
+                        null,
+                        React.createElement(
+                            "a",
+                            { href: "https://travis-ci.org/" + owner + "/" + name },
+                            React.createElement("img", { src: "https://img.shields.io/travis/" + owner + "/" + name + "/master.svg?style=flat-square", alt: "build status" })
+                        )
                     )
                 );
             } else {
