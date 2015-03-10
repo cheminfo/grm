@@ -61,7 +61,7 @@ export default React.createClass({
     render() {
         var active = this.state.active;
         if (!this.props.visible && !active) {
-            return (<tr></tr>);
+            return (<tr ></tr>);
         }
         if (this.state.loading) {
             return (
@@ -99,7 +99,7 @@ export default React.createClass({
                             {name}
                         </td>
                         <td>
-                            v{version}
+                            <strong>v{version}</strong>
                         </td>
                         <td>
                             <input type="button" value={patch}
@@ -108,7 +108,7 @@ export default React.createClass({
                                    onClick={this.release.bind(this, 'minor')} disabled={locked} />
                             <input type="button" value={major}
                                    onClick={this.release.bind(this, 'major')} disabled={locked} />
-                            <input type="button" value="NPM"
+                            &nbsp;<input type="button" value="NPM"
                                    onClick={this.npmPublish} disabled={locked} />
                         </td>
                         <td>

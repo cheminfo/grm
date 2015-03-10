@@ -16,8 +16,8 @@ export default React.createClass({
         }
         return (
             <div>
-                <h3>{this.props.owner}</h3>
-                <table>{repos}</table>
+                <tr><td colSpan="4"><h3>{this.props.owner}</h3></td></tr>
+                {repos}
             </div>
         );
     }

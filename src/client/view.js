@@ -35,11 +35,13 @@ export default React.createClass({
                     <div>
                         <label><input type="checkbox" onChange={this.switchVisible} /> show all repositories</label> (<a onClick={this.props.reload} href="#" title="reload list from GitHub">reload</a>)
                     </div>
-                    {owners.map(function (owner) {
-                        return (
-                            <RepoList visible={this.state.visible} key={owner} owner={owner} repos={repos[owner]} />
-                        );
-                    }, this)}
+                    <table>
+                        {owners.map(function (owner) {
+                            return (
+                                <RepoList visible={this.state.visible} key={owner} owner={owner} repos={repos[owner]} />
+                            );
+                        }, this)}
+                    </table>
                 </div>
             );
         }
