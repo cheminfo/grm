@@ -20757,15 +20757,19 @@ module.exports = React.createClass({
             "div",
             null,
             React.createElement(
-                "h3",
+                "tr",
                 null,
-                this.props.owner
+                React.createElement(
+                    "td",
+                    { colSpan: "4" },
+                    React.createElement(
+                        "h3",
+                        null,
+                        this.props.owner
+                    )
+                )
             ),
-            React.createElement(
-                "table",
-                null,
-                repos
-            )
+            repos
         );
     }
 });
@@ -20884,8 +20888,12 @@ module.exports = React.createClass({
                     React.createElement(
                         "td",
                         null,
-                        "v",
-                        version
+                        React.createElement(
+                            "strong",
+                            null,
+                            "v",
+                            version
+                        )
                     ),
                     React.createElement(
                         "td",
@@ -20896,6 +20904,7 @@ module.exports = React.createClass({
                             onClick: this.release.bind(this, "minor"), disabled: locked }),
                         React.createElement("input", { type: "button", value: major,
                             onClick: this.release.bind(this, "major"), disabled: locked }),
+                        " ",
                         React.createElement("input", { type: "button", value: "NPM",
                             onClick: this.npmPublish, disabled: locked })
                     ),
@@ -21061,9 +21070,13 @@ module.exports = React.createClass({
                     ),
                     ")"
                 ),
-                owners.map(function (owner) {
-                    return React.createElement(RepoList, { visible: this.state.visible, key: owner, owner: owner, repos: repos[owner] });
-                }, this)
+                React.createElement(
+                    "table",
+                    null,
+                    owners.map(function (owner) {
+                        return React.createElement(RepoList, { visible: this.state.visible, key: owner, owner: owner, repos: repos[owner] });
+                    }, this)
+                )
             );
         }
     }
