@@ -77,6 +77,8 @@ export default React.createClass({
                 var minor = sversion.version;
                 sversion.inc('major');
                 var major = sversion.version;
+                var name = this.props.repo.name;
+                var owner = this.props.repo.owner;
                 return (
                     <tr>
                         <td>
@@ -84,7 +86,7 @@ export default React.createClass({
                                    onChange={this.switchEnable}/>
                         </td>
                         <td>
-                            {this.props.repo.name}
+                            {name}
                         </td>
                         <td>
                             v{version}
@@ -96,6 +98,11 @@ export default React.createClass({
                                    onClick={this.release.bind(this, 'minor')} disabled={locked} />
                             <input type="button" value={major}
                                    onClick={this.release.bind(this, 'major')} disabled={locked} />
+                        </td>
+                        <td>
+                            <a href={`https://travis-ci.org/${owner}/${name}`}>
+                                <img src={`https://img.shields.io/travis/${owner}/${name}/master.svg?style=flat-square`} alt="build status" />
+                            </a>
                         </td>
                     </tr>
                 );
