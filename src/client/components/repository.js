@@ -32,25 +32,21 @@ export default React.createClass({
                 this.setState(res.body);
             });
     },
-    releasePatch() {
-        this.release('patch');
-    },
-    releaseMinor() {
-        this.release('minor');
-    },
-    releaseMajor() {
-        this.release('major');
-    },
     release(inc) {
-        this.setState({
-            locked: true
-        });
-        agent
-            .get(`repo/${this.state.owner}/${this.state.name}?action=publish&bump=${inc}`)
-            .end(res => {
-                res.body.locked = false;
-                this.setState(res.body);
+        var v = semver(this.state.version);
+        v.inc(inc);
+        var confirm = window.confirm(`Bump ${this.props.repo.name} to v${v.version}?`);
+        if (confirm) {
+            this.setState({
+                locked: true
             });
+            agent
+                .get(`repo/${this.state.owner}/${this.state.name}?action=publish&bump=${inc}`)
+                .end(res => {
+                    res.body.locked = false;
+                    this.setState(res.body);
+                });
+        }
     },
     render() {
         var active = this.state.active;
@@ -95,11 +91,11 @@ export default React.createClass({
                         </td>
                         <td>
                             <input type="button" value={patch}
-                                   onClick={this.releasePatch} disabled={locked} />
+                                   onClick={this.release.bind(this, 'patch')} disabled={locked} />
                             <input type="button" value={minor}
-                                   onClick={this.releaseMinor} disabled={locked} />
+                                   onClick={this.release.bind(this, 'minor')} disabled={locked} />
                             <input type="button" value={major}
-                                   onClick={this.releaseMajor} disabled={locked} />
+                                   onClick={this.release.bind(this, 'major')} disabled={locked} />
                         </td>
                     </tr>
                 );
