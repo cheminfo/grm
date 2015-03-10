@@ -73,6 +73,13 @@ function*doPublish(files, message) {
 }
 Git.prototype.publish = makeTask('publish', doPublish);
 
+function*doNpmPublish() {
+    yield this.pull();
+    debug(`publishing on NPM`);
+    yield child_process.execFile('npm', 'publish', this.execOptions);
+}
+Git.prototype.npmPublish = makeTask('npmPublish', doNpmPublish);
+
 function*doReadPkg() {
     yield this.pull();
     debug('reading package files');

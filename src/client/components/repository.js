@@ -48,6 +48,16 @@ export default React.createClass({
                 });
         }
     },
+    npmPublish() {
+        this.setState({
+            locked: true
+        });
+        agent
+            .get(`repo/${this.state.owner}/${this.state.name}?action=npm`)
+            .end(() => {
+                this.setState({locked: false});
+            });
+    },
     render() {
         var active = this.state.active;
         if (!this.props.visible && !active) {
@@ -98,6 +108,8 @@ export default React.createClass({
                                    onClick={this.release.bind(this, 'minor')} disabled={locked} />
                             <input type="button" value={major}
                                    onClick={this.release.bind(this, 'major')} disabled={locked} />
+                            <input type="button" value="NPM"
+                                   onClick={this.npmPublish} disabled={locked} />
                         </td>
                         <td>
                             <a href={`https://travis-ci.org/${owner}/${name}`}>

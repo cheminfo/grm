@@ -38,6 +38,9 @@ module.exports = function*() {
         case 'publish':
             this.body = yield publish.call(this);
             break;
+        case 'npm':
+            this.body = yield npmPublish.call(this);
+            break;
         default:
             this.status = 400;
             this.body = 'Unknown action: ' + action;
@@ -141,6 +144,12 @@ function*publish() {
         yield fs.writeFile(path.join(cdnDir2, buildFiles[i].name), file);
     }
     return yield getStatus.call(this);
+}
+
+function*npmPublish() {
+    debug('start npm publish');
+    var git = getGit.call(this);
+    yield git.npmPublish();
 }
 
 function getGit() {
