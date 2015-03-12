@@ -132,16 +132,18 @@ function*publish() {
     var cdnDir2 = path.join(cdnDir, pkg.node.name, version);
     yield mkdirp(cdnDir2);
 
-    debug(`uploading ${buildFiles.length} files`);
+    debug(`uploading ${buildFiles.length} files:`, buildFiles);
     for (var i = 0; i < buildFiles.length; i++) {
-        debug('uploading file ' + i);
+        var name = buildFiles[i].name;
+        debug(`uploading file ${i} with name ${name}`);
         var file = yield fs.readFile(buildFiles[i].path);
         try {
-            yield send(uploadURL.replace('{?name}', `?name=${buildFiles[i].name}&access_token=${this.token}`), file);
+            yield releaseInfo.upload(name, 'application/javascript', file);
         } catch (e) {
-            console.error(`could not send ${buildFiles[i].path}`);
+            console.error(e.json);
+            console.error(`could not send ${name}`);
         }
-        yield fs.writeFile(path.join(cdnDir2, buildFiles[i].name), file);
+        yield fs.writeFile(path.join(cdnDir2, name), file);
     }
     return yield getStatus.call(this);
 }
@@ -154,14 +156,4 @@ function*npmPublish() {
 
 function getGit() {
     return gitCache[this.state.fullName] || (gitCache[this.state.fullName] = new Git(encodeURIComponent(this.state.owner), encodeURIComponent(this.state.repo), this.token));
-}
-
-function send(url, file) {
-    return new Promise(function (resolve, reject) {
-        var request = agent.post(url);
-        request.set('Content-Type', 'application/javascript');
-        request.send(file);
-        request.on('error', reject);
-        request.end(resolve);
-    });
 }
