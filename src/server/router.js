@@ -10,7 +10,7 @@ module.exports = function (app) {
     let router = new Router();
 
     router.get('/username', function*() {
-        var user = yield this.github.getUser();
+        let user = yield this.github.getUser();
         this.body = user.login;
     });
 

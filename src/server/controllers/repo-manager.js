@@ -2,7 +2,6 @@
 
 const semver = require('semver');
 const fs = require('mz/fs');
-const agent = require('superagent');
 const debug = require('debug')('grm:repo');
 const path = require('path');
 const mkdirp = require('mkdirp-then');
@@ -13,17 +12,17 @@ const cdnDir = path.resolve(config.dir.cdn);
 const Git = require('../util/git');
 const mongo = require('../util/mongo');
 
-var gitCache = {};
+const gitCache = {};
 
-// /repo/:owner/:repo
+/* /repo/:owner/:repo */
 module.exports = function*() {
-    var owner = this.state.owner = this.params.owner;
-    var repo = this.state.repo = this.params.repo;
+    let owner = this.state.owner = this.params.owner;
+    let repo = this.state.repo = this.params.repo;
     this.state.fullName = `${owner}/${repo}`;
 
     this.state.mongoRepo = mongo.collection('repos');
 
-    var action = this.query.action;
+    let action = this.query.action;
     if (!action) {
         this.status = 400;
         return this.body = 'Action required';
@@ -45,28 +44,27 @@ module.exports = function*() {
             this.status = 400;
             this.body = 'Unknown action: ' + action;
     }
-
 };
 
 function*getStatus() {
-    var status = yield this.state.mongoRepo.findOne({
+    let status = yield this.state.mongoRepo.findOne({
         owner: this.state.owner,
         name: this.state.repo
     });
     if (status.active) {
-        var git = getGit.call(this);
-        var pkg = yield git.readPkg();
+        let git = getGit.call(this);
+        let pkg = yield git.readPkg();
         status.version = pkg.node.version;
     }
     return status;
 }
 
 function*enable() {
-    var status = yield getStatus.call(this);
+    let status = yield getStatus.call(this);
     if (!status.active) {
         // make sure that the repo is cloned
-        var git = getGit.call(this);
-        var pkg = yield git.readPkg();
+        let git = getGit.call(this);
+        let pkg = yield git.readPkg();
         if (!pkg.node) {
             this.throw('No node version number');
         }
@@ -84,23 +82,23 @@ function*enable() {
 
 function*publish() {
     debug('start publishing');
-    var git = getGit.call(this);
+    let git = getGit.call(this);
     if (!this.query.bump) {
         this.status = 400;
         return 'Bump info is needed';
     }
     // Get current version number
-    var pkg = yield git.readPkg();
-    var toAdd = ['package.json'];
+    let pkg = yield git.readPkg();
+    let toAdd = ['package.json'];
     if (!pkg.node) {
         this.status = 500;
         return 'No package.json';
     }
 
-    var currentVersion = semver(pkg.node.version);
+    let currentVersion = semver(pkg.node.version);
     // Bumping version
     currentVersion.inc(this.query.bump);
-    var version = currentVersion.version;
+    let version = currentVersion.version;
 
     pkg.node.version = version;
     if (pkg.bower) {
@@ -109,34 +107,29 @@ function*publish() {
     }
 
     yield git.writePkg(pkg);
-    var buildFiles = yield git.build();
+    let buildFiles = yield git.build();
 
     toAdd.push('dist/*');
 
-    var releaseMessage = `Release v${version}`;
+    let releaseMessage = `Release v${version}`;
     yield git.publish(toAdd, releaseMessage);
 
-    // TODO add support for npm-publish
-    // need to check if the name is not taken
-    //yield git.npmPublish();
-
-    var repo = this.github.getRepo(this.state.owner, this.state.repo);
+    let repo = this.github.getRepo(this.state.owner, this.state.repo);
     debug('creating release');
-    var releaseInfo = yield repo.releases.create({
+    let releaseInfo = yield repo.releases.create({
         tag_name: `v${version}`,
         name: releaseMessage,
         prerelease: this.query.bump.startsWith('pre')
     });
 
-    var uploadURL = releaseInfo.upload.url;
-    var cdnDir2 = path.join(cdnDir, pkg.node.name, version);
+    let cdnDir2 = path.join(cdnDir, pkg.node.name, version);
     yield mkdirp(cdnDir2);
 
     debug(`uploading ${buildFiles.length} files:`, buildFiles);
-    for (var i = 0; i < buildFiles.length; i++) {
-        var name = buildFiles[i].name;
+    for (let i = 0; i < buildFiles.length; i++) {
+        let name = buildFiles[i].name;
         debug(`uploading file ${i} with name ${name}`);
-        var file = yield fs.readFile(buildFiles[i].path);
+        let file = yield fs.readFile(buildFiles[i].path);
         try {
             yield releaseInfo.upload(name, 'application/javascript', file);
         } catch (e) {
@@ -150,7 +143,7 @@ function*publish() {
 
 function*npmPublish() {
     debug('start npm publish');
-    var git = getGit.call(this);
+    let git = getGit.call(this);
     yield git.npmPublish();
 }
 

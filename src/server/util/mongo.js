@@ -1,6 +1,6 @@
 'use strict';
 
-var db;
+let db;
 
 exports.setDB = function (thedb) {
     db = thedb;

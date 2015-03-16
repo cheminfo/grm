@@ -10,22 +10,22 @@ const fields = {
 };
 
 module.exports = function*() {
-    var allRepos =  yield mongo.collection('repos').find().fields(fields);
+    let allRepos =  yield mongo.collection('repos').find().fields(fields);
     if (allRepos.length === 0 || this.query.force) {
-        var githubRepos = yield this.github.getRepositories(true);
+        let githubRepos = yield this.github.getRepositories(true);
         allRepos = yield updateMongo(githubRepos);
     }
     this.body = allRepos;
 };
 
 function*updateMongo(repos) {
-    var coll = mongo.collection('repos');
-    var results = new Array(repos.length);
-    for (var i = 0; i < repos.length; i++) {
-        var repo = repos[i];
-        var owner = repo.owner.login;
-        var name = repo.name;
-        var result = yield coll.findOne({
+    let coll = mongo.collection('repos');
+    let results = new Array(repos.length);
+    for (let i = 0; i < repos.length; i++) {
+        let repo = repos[i];
+        let owner = repo.owner.login;
+        let name = repo.name;
+        let result = yield coll.findOne({
             owner: owner,
             name: name
         }).fields(fields);

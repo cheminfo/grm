@@ -29,7 +29,7 @@ function Git(org, repo, OAuthToken) {
 }
 
 function*initRepo() {
-    var exist = yield fs.exists(path.join(this.repoDir, '.git'));
+    let exist = yield fs.exists(path.join(this.repoDir, '.git'));
     if (!exist) {
         debug(`Repo ${this.org}/${this.repo} does not exist, cloning`);
         yield mkdirp(this.orgDir);
@@ -52,8 +52,8 @@ function*doBuild() {
     yield child_process.execFile('npm', ['install'], this.execOptions);
     yield child_process.execFile('npm', ['run', 'build'], this.execOptions);
     debug('build finished, getting list of files');
-    var buildDir = path.join(this.repoDir, 'dist');
-    var buildFiles = yield fs.readdir(buildDir);
+    let buildDir = path.join(this.repoDir, 'dist');
+    let buildFiles = yield fs.readdir(buildDir);
     return buildFiles.map(function (file) {
         return {
             name: file,
@@ -83,16 +83,16 @@ Git.prototype.npmPublish = makeTask('npmPublish', doNpmPublish);
 function*doReadPkg() {
     yield this.pull();
     debug('reading package files');
-    var result = {
+    let result = {
         node: null,
         bower: null
     };
-    var packageNode = path.join(this.repoDir, 'package.json');
+    let packageNode = path.join(this.repoDir, 'package.json');
     if (yield fs.exists(packageNode)) {
         result.node = JSON.parse(yield fs.readFile(packageNode, 'utf-8'));
         debug('found package.json');
     }
-    var packageBower = path.join(this.repoDir, 'bower.json');
+    let packageBower = path.join(this.repoDir, 'bower.json');
     if (yield fs.exists(packageBower)) {
         result.bower = JSON.parse(yield fs.readFile(packageBower, 'utf-8'));
         debug('found bower.json');
@@ -113,7 +113,7 @@ function*doWritePkg(pkg) {
 Git.prototype.writePkg = makeTask('writePkg', doWritePkg);
 
 Git.prototype.task = function (name, executor, onlyOnce, args) {
-    var task = this.tasks[name];
+    let task = this.tasks[name];
     if (task) {
         if (task === true) {
             return Promise.resolve();
@@ -121,7 +121,7 @@ Git.prototype.task = function (name, executor, onlyOnce, args) {
             return task;
         }
     } else {
-        var self = this;
+        let self = this;
         this.tasks[name] = executor.apply(this, args).then(function (result) {
             self.tasks[name] = !!onlyOnce;
             return result;

@@ -14,11 +14,11 @@ const router = require('./router');
 const index = path.resolve(__dirname, '../client/index.html');
 
 module.exports = function (app, config) {
-    var db = config.mongodb;
-    var mongodb = DB(`mongodb://${db.host}:${db.port}/${db.db}`);
+    let db = config.mongodb;
+    let mongodb = DB(`mongodb://${db.host}:${db.port}/${db.db}`);
     mongo.setDB(mongodb);
 
-    var gh = github(config.oauth);
+    let gh = github(config.oauth);
 
     debug('connecting to MongoDB');
 
