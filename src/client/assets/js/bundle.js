@@ -20804,12 +20804,18 @@ module.exports = React.createClass({
     },
     switchEnable: function switchEnable() {
         var _this = this;
-        this.setState({
-            locked: true
-        });
+        this.lock();
         agent.get("repo/" + this.state.owner + "/" + this.state.name + "?action=enable").end(function (res) {
-            res.body.locked = false;
-            _this.setState(res.body);
+            var result;
+            if (res.status === 200) {
+                result = res.body;
+            } else {
+                result = {
+                    error: "Enable failed"
+                };
+            }
+            result.locked = false;
+            _this.setState(result);
         });
     },
     release: function release(inc) {
@@ -20818,22 +20824,38 @@ module.exports = React.createClass({
         v.inc(inc);
         var confirm = window.confirm("Bump " + this.props.repo.name + " to v" + v.version + "?");
         if (confirm) {
-            this.setState({
-                locked: true
-            });
+            this.lock();
             agent.get("repo/" + this.state.owner + "/" + this.state.name + "?action=publish&bump=" + inc).end(function (res) {
-                res.body.locked = false;
-                _this.setState(res.body);
+                var result;
+                if (res.status === 200) {
+                    result = res.body;
+                } else {
+                    result = {
+                        error: "Error during release process"
+                    };
+                }
+                result.locked = false;
+                _this.setState(result);
             });
         }
     },
     npmPublish: function npmPublish() {
         var _this = this;
-        this.setState({
-            locked: true
+        this.lock();
+        agent.get("repo/" + this.state.owner + "/" + this.state.name + "?action=npm").end(function (res) {
+            var result = {
+                locked: false
+            };
+            if (res.status !== 200) {
+                result.error = "Error during NPM publish";
+            }
+            _this.setState(result);
         });
-        agent.get("repo/" + this.state.owner + "/" + this.state.name + "?action=npm").end(function () {
-            _this.setState({ locked: false });
+    },
+    lock: function lock() {
+        this.setState({
+            locked: true,
+            error: false
         });
     },
     render: function render() {
@@ -20925,6 +20947,11 @@ module.exports = React.createClass({
                             { href: "https://travis-ci.org/" + owner + "/" + name },
                             React.createElement("img", { src: "https://img.shields.io/travis/" + owner + "/" + name + "/master.svg?style=flat-square", alt: "build status" })
                         )
+                    ),
+                    React.createElement(
+                        "td",
+                        null,
+                        this.state.error ? this.state.error : ""
                     )
                 );
             } else {

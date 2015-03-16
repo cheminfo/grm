@@ -75,8 +75,19 @@ Git.prototype.publish = makeTask('publish', doPublish);
 
 function*doNpmPublish() {
     yield this.pull();
-    debug(`publishing on NPM`);
-    yield child_process.execFile('npm', 'publish', this.execOptions);
+    try {
+        debug('getting npm authors');
+        var authors = yield child_process.execFile('npm', ['author', 'ls'], this.execOptions);
+        var isAdmin = authors[0].includes('cheminfo-bot');
+        if (isAdmin) {
+            debug(`publishing on NPM`);
+            yield child_process.execFile('npm', ['publish'], this.execOptions);
+        } else {
+            debug('cheminfo-bot is not an admin')
+        }
+    } catch (e) {
+        throw new Error('NPM publish failed');
+    }
 }
 Git.prototype.npmPublish = makeTask('npmPublish', doNpmPublish);
 

@@ -22,14 +22,20 @@ export default React.createClass({
             });
     },
     switchEnable() {
-        this.setState({
-            locked: true
-        });
+        this.lock();
         agent
             .get(`repo/${this.state.owner}/${this.state.name}?action=enable`)
             .end(res => {
-                res.body.locked = false;
-                this.setState(res.body);
+                var result;
+                if (res.status === 200) {
+                    result = res.body;
+                } else {
+                    result = {
+                        error: 'Enable failed'
+                    };
+                }
+                result.locked = false;
+                this.setState(result);
             });
     },
     release(inc) {
@@ -37,26 +43,42 @@ export default React.createClass({
         v.inc(inc);
         var confirm = window.confirm(`Bump ${this.props.repo.name} to v${v.version}?`);
         if (confirm) {
-            this.setState({
-                locked: true
-            });
+            this.lock();
             agent
                 .get(`repo/${this.state.owner}/${this.state.name}?action=publish&bump=${inc}`)
                 .end(res => {
-                    res.body.locked = false;
-                    this.setState(res.body);
+                    var result;
+                    if (res.status === 200) {
+                        result = res.body;
+                    } else {
+                        result = {
+                            error:'Error during release process'
+                        };
+                    }
+                    result.locked = false;
+                    this.setState(result);
                 });
         }
     },
     npmPublish() {
-        this.setState({
-            locked: true
-        });
+        this.lock();
         agent
             .get(`repo/${this.state.owner}/${this.state.name}?action=npm`)
-            .end(() => {
-                this.setState({locked: false});
+            .end(res => {
+                var result = {
+                    locked: false
+                };
+                if (res.status !== 200) {
+                    result.error = 'Error during NPM publish';
+                }
+                this.setState(result);
             });
+    },
+    lock() {
+        this.setState({
+            locked: true,
+            error: false
+        });
     },
     render() {
         var active = this.state.active;
@@ -120,6 +142,9 @@ export default React.createClass({
                             <a href={`https://travis-ci.org/${owner}/${name}`}>
                                 <img src={`https://img.shields.io/travis/${owner}/${name}/master.svg?style=flat-square`} alt="build status" />
                             </a>
+                        </td>
+                        <td>
+                            {this.state.error ? this.state.error : ''}
                         </td>
                     </tr>
                 );

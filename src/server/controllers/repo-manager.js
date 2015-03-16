@@ -147,6 +147,7 @@ function*npmPublish() {
     debug('start npm publish');
     let git = getGit.call(this);
     yield git.npmPublish();
+    return 'OK';
 }
 
 function getGit() {
