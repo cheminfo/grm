@@ -112,6 +112,11 @@ export default React.createClass({
                                    onClick={this.npmPublish} disabled={locked} />
                         </td>
                         <td>
+                            <a href={`https://www.npmjs.com/package/${this.state.npm}`}>
+                                <img src={`https://img.shields.io/npm/v/${this.state.npm}.svg?style=flat-square`} alt="npm package status" />
+                            </a>
+                        </td>
+                        <td>
                             <a href={`https://travis-ci.org/${owner}/${name}`}>
                                 <img src={`https://img.shields.io/travis/${owner}/${name}/master.svg?style=flat-square`} alt="build status" />
                             </a>

@@ -55,6 +55,7 @@ function*getStatus() {
         let git = getGit.call(this);
         let pkg = yield git.readPkg();
         status.version = pkg.node.version;
+        status.npm = pkg.node.name;
     }
     return status;
 }
@@ -69,6 +70,7 @@ function*enable() {
             this.throw('No node version number');
         }
         status.version = pkg.node.version;
+        status.npm = pkg.node.name;
     }
     // invert the status
     status.active = !status.active;

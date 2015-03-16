@@ -20913,6 +20913,15 @@ module.exports = React.createClass({
                         null,
                         React.createElement(
                             "a",
+                            { href: "https://www.npmjs.com/package/" + this.state.npm },
+                            React.createElement("img", { src: "https://img.shields.io/npm/v/" + this.state.npm + ".svg?style=flat-square", alt: "npm package status" })
+                        )
+                    ),
+                    React.createElement(
+                        "td",
+                        null,
+                        React.createElement(
+                            "a",
                             { href: "https://travis-ci.org/" + owner + "/" + name },
                             React.createElement("img", { src: "https://img.shields.io/travis/" + owner + "/" + name + "/master.svg?style=flat-square", alt: "build status" })
                         )
