@@ -84,63 +84,67 @@ function*enable() {
 
 function*publish() {
     debug('start publishing');
-    let git = getGit.call(this);
-    if (!this.query.bump) {
-        this.status = 400;
-        return 'Bump info is needed';
-    }
-    // Get current version number
-    let pkg = yield git.readPkg();
-    let toAdd = ['package.json'];
-    if (!pkg.node) {
-        this.status = 500;
-        return 'No package.json';
-    }
-
-    let currentVersion = semver(pkg.node.version);
-    // Bumping version
-    currentVersion.inc(this.query.bump);
-    let version = currentVersion.version;
-
-    pkg.node.version = version;
-    if (pkg.bower) {
-        pkg.bower.version = version;
-        toAdd.push('bower.json');
-    }
-
-    yield git.writePkg(pkg);
-    let buildFiles = yield git.build();
-
-    toAdd.push('dist/*');
-
-    let releaseMessage = `Release v${version}`;
-    yield git.publish(toAdd, releaseMessage);
-
-    let repo = this.github.getRepo(this.state.owner, this.state.repo);
-    debug('creating release');
-    let releaseInfo = yield repo.releases.create({
-        tag_name: `v${version}`,
-        name: releaseMessage,
-        prerelease: this.query.bump.startsWith('pre')
-    });
-
-    let cdnDir2 = path.join(cdnDir, pkg.node.name, version);
-    yield mkdirp(cdnDir2);
-
-    debug(`uploading ${buildFiles.length} files:`, buildFiles);
-    for (let i = 0; i < buildFiles.length; i++) {
-        let name = buildFiles[i].name;
-        debug(`uploading file ${i} with name ${name}`);
-        let file = yield fs.readFile(buildFiles[i].path);
-        try {
-            yield releaseInfo.upload(name, 'application/javascript', file);
-        } catch (e) {
-            console.error(e.json);
-            console.error(`could not send ${name}`);
+    try {
+        let git = getGit.call(this);
+        if (!this.query.bump) {
+            this.status = 400;
+            return 'Bump info is needed';
         }
-        yield fs.writeFile(path.join(cdnDir2, name), file);
+        // Get current version number
+        let pkg = yield git.readPkg();
+        let toAdd = ['package.json'];
+        if (!pkg.node) {
+            this.status = 500;
+            return 'No package.json';
+        }
+
+        let currentVersion = semver(pkg.node.version);
+        // Bumping version
+        currentVersion.inc(this.query.bump);
+        let version = currentVersion.version;
+
+        pkg.node.version = version;
+        if (pkg.bower) {
+            pkg.bower.version = version;
+            toAdd.push('bower.json');
+        }
+
+        yield git.writePkg(pkg);
+        let buildFiles = yield git.build();
+
+        toAdd.push('dist/*');
+
+        let releaseMessage = `Release v${version}`;
+        yield git.publish(toAdd, releaseMessage);
+
+        debug('creating release');
+        let repo = this.github.getRepo(this.state.owner, this.state.repo);
+        let releaseInfo = yield repo.releases.create({
+            tag_name: `v${version}`,
+            name: releaseMessage,
+            prerelease: this.query.bump.startsWith('pre')
+        });
+
+        let cdnDir2 = path.join(cdnDir, pkg.node.name, version);
+        yield mkdirp(cdnDir2);
+
+        debug(`uploading ${buildFiles.length} files:`, buildFiles);
+        for (let i = 0; i < buildFiles.length; i++) {
+            let name = buildFiles[i].name;
+            debug(`uploading file ${i} with name ${name}`);
+            let file = yield fs.readFile(buildFiles[i].path);
+            try {
+                yield releaseInfo.upload(name, 'application/javascript', file);
+            } catch (e) {
+                console.error(e.json);
+                console.error(`could not send ${name}`);
+            }
+            yield fs.writeFile(path.join(cdnDir2, name), file);
+        }
+        return yield getStatus.call(this);
+    } catch (e) {
+        throw e; // TODO print error
     }
-    return yield getStatus.call(this);
 }
 
 function*npmPublish() {
