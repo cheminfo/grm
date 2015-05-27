@@ -20839,6 +20839,19 @@ module.exports = React.createClass({
             });
         }
     },
+    buildHead: function buildHead() {
+        var _this = this;
+        this.lock();
+        agent.get("repo/" + this.state.owner + "/" + this.state.name + "?action=head").end(function (res) {
+            var result = {
+                locked: false
+            };
+            if (res.status !== 200) {
+                result.error = "Error during HEAD build";
+            }
+            _this.setState(result);
+        });
+    },
     npmPublish: function npmPublish() {
         var _this = this;
         this.lock();
@@ -20926,6 +20939,9 @@ module.exports = React.createClass({
                             onClick: this.release.bind(this, "minor"), disabled: locked }),
                         React.createElement("input", { type: "button", value: major,
                             onClick: this.release.bind(this, "major"), disabled: locked }),
+                        " ",
+                        React.createElement("input", { type: "button", value: "HEAD",
+                            onClick: this.buildHead, disabled: locked }),
                         " ",
                         React.createElement("input", { type: "button", value: "NPM",
                             onClick: this.npmPublish, disabled: locked })

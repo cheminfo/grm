@@ -60,6 +60,20 @@ export default React.createClass({
                 });
         }
     },
+    buildHead() {
+        this.lock();
+        agent
+            .get(`repo/${this.state.owner}/${this.state.name}?action=head`)
+            .end(res => {
+                var result = {
+                    locked: false
+                };
+                if (res.status !== 200) {
+                    result.error = 'Error during HEAD build';
+                }
+                this.setState(result);
+            });
+    },
     npmPublish() {
         this.lock();
         agent
@@ -130,6 +144,8 @@ export default React.createClass({
                                    onClick={this.release.bind(this, 'minor')} disabled={locked} />
                             <input type="button" value={major}
                                    onClick={this.release.bind(this, 'major')} disabled={locked} />
+                            &nbsp;<input type="button" value="HEAD"
+                                         onClick={this.buildHead} disabled={locked} />
                             &nbsp;<input type="button" value="NPM"
                                    onClick={this.npmPublish} disabled={locked} />
                         </td>

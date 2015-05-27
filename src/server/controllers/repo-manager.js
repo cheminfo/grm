@@ -40,6 +40,9 @@ module.exports = function*() {
         case 'npm':
             this.body = yield npmPublish.call(this);
             break;
+        case 'head':
+            this.body = yield buildHead.call(this);
+            break;
         default:
             this.status = 400;
             this.body = 'Unknown action: ' + action;
@@ -151,6 +154,27 @@ function*npmPublish() {
     debug('start npm publish');
     let git = getGit.call(this);
     yield git.npmPublish();
+    return 'OK';
+}
+
+function*buildHead() {
+    debug('building head');
+    let git = getGit.call(this);
+
+    let pkg = yield git.readPkg();
+    if (!pkg.node) {
+        this.status = 500;
+        return 'No package.json';
+    }
+
+    let buildFiles = yield git.build();
+    let cdnDir2 = path.join(cdnDir, pkg.node.name, 'HEAD');
+    yield mkdirp(cdnDir2);
+    for (let i = 0; i < buildFiles.length; i++) {
+        let name = buildFiles[i].name;
+        let file = yield fs.readFile(buildFiles[i].path);
+        yield fs.writeFile(path.join(cdnDir2, name), file);
+    }
     return 'OK';
 }
 
