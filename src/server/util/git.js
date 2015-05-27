@@ -39,15 +39,18 @@ function*initRepo() {
 }
 Git.prototype.init = makeTask('init', initRepo, true);
 
-function*pullRepo() {
+function*pullRepo(reset) {
     yield this.init();
     debug('pulling from GitHub');
+    if (reset) {
+        yield child_process.execFile('git', ['reset', '--hard', 'origin/master'], this.execOptions);
+    }
     yield child_process.execFile('git', ['pull'], this.execOptions);
 }
 Git.prototype.pull = makeTask('pull', pullRepo);
 
 function*doBuild() {
-    yield this.pull();
+    yield this.pull(true);
     debug('building project');
     yield child_process.execFile('npm', ['install'], this.execOptions);
     yield child_process.execFile('npm', ['run', 'build'], this.execOptions);
@@ -64,7 +67,6 @@ function*doBuild() {
 Git.prototype.build = makeTask('build', doBuild);
 
 function*doPublish(files, message) {
-    yield this.pull();
     debug(`publishing : ${message}`);
     yield child_process.execFile('git', ['add'].concat(files), this.execOptions);
     yield child_process.execFile('git', ['commit', '-m', message], this.execOptions);
@@ -74,7 +76,6 @@ function*doPublish(files, message) {
 Git.prototype.publish = makeTask('publish', doPublish);
 
 function*doNpmPublish() {
-    yield this.pull();
     try {
         debug('getting npm authors');
         var authors = yield child_process.execFile('npm', ['author', 'ls'], this.execOptions);
@@ -92,7 +93,7 @@ function*doNpmPublish() {
 Git.prototype.npmPublish = makeTask('npmPublish', doNpmPublish);
 
 function*doReadPkg() {
-    yield this.pull();
+    yield this.pull(true);
     debug('reading package files');
     let result = {
         node: null,
