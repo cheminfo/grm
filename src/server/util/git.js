@@ -50,7 +50,7 @@ function*pullRepo(reset) {
 Git.prototype.pull = makeTask('pull', pullRepo);
 
 function*doBuild() {
-    yield this.pull(true);
+    yield this.pull();
     debug('building project');
     yield child_process.execFile('npm', ['install'], this.execOptions);
     yield child_process.execFile('npm', ['run', 'build'], this.execOptions);

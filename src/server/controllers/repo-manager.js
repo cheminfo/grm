@@ -93,6 +93,8 @@ function*publish() {
             this.status = 400;
             return 'Bump info is needed';
         }
+        // Reset local repo before everything
+        yield git.pull(true);
         // Get current version number
         let pkg = yield git.readPkg();
         let toAdd = ['package.json'];
@@ -167,6 +169,7 @@ function*buildHead() {
         return 'No package.json';
     }
 
+    yield git.pull(true);
     let buildFiles = yield git.build();
     let cdnDir2 = path.join(cdnDir, pkg.node.name, 'HEAD');
     yield mkdirp(cdnDir2);
