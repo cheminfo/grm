@@ -93,7 +93,7 @@ function*doNpmPublish() {
 Git.prototype.npmPublish = makeTask('npmPublish', doNpmPublish);
 
 function*doReadPkg() {
-    yield this.pull();
+    yield this.pull(true);
     debug('reading package files');
     let result = {
         node: null,
