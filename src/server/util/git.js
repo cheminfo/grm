@@ -55,14 +55,18 @@ function*doBuild() {
     yield child_process.execFile('npm', ['update'], this.execOptions);
     yield child_process.execFile('npm', ['run', 'build'], this.execOptions);
     debug('build finished, getting list of files');
-    let buildDir = path.join(this.repoDir, 'dist');
-    let buildFiles = yield fs.readdir(buildDir);
-    return buildFiles.map(function (file) {
-        return {
-            name: file,
-            path: path.join(buildDir, file)
-        };
-    });
+    try {
+        let buildDir = path.join(this.repoDir, 'dist');
+        let buildFiles = yield fs.readdir(buildDir);
+        return buildFiles.map(function (file) {
+            return {
+                name: file,
+                path: path.join(buildDir, file)
+            };
+        });
+    } catch (e) {
+        return [];
+    }
 }
 Git.prototype.build = makeTask('build', doBuild);
 

@@ -115,7 +115,13 @@ function*publish() {
         yield git.writePkg(pkg);
         let buildFiles = yield git.build();
 
-        toAdd.push('dist/*');
+        try {
+            yield fs.stat(path.join(git.repoDir, 'dist'));
+            toAdd.push('dist/*');
+        } catch(e) {
+            debug('dist does not exist, not adding it');
+        }
+
 
         let releaseMessage = `Release v${version}`;
         yield git.publish(toAdd, releaseMessage);
@@ -128,6 +134,9 @@ function*publish() {
             prerelease: this.query.bump.startsWith('pre')
         });
 
+        if(!buildFiles.length) {
+            return yield getStatus.call(this);
+        }
         let cdnDir2 = path.join(cdnDir, pkg.node.name, version);
         yield mkdirp(cdnDir2);
 
@@ -168,6 +177,10 @@ function*buildHead() {
     }
 
     let buildFiles = yield git.build();
+    if(!buildFiles.length) {
+        return 'OK';
+    }
+
     let cdnDir2 = path.join(cdnDir, pkg.node.name, 'HEAD');
     yield mkdirp(cdnDir2);
     for (let i = 0; i < buildFiles.length; i++) {
