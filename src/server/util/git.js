@@ -120,10 +120,10 @@ Git.prototype.readPkg = makeTask('readPkg', doReadPkg);
 function*doWritePkg(pkg) {
     debug('writing package files');
     if (pkg.node) {
-        yield fs.writeFile(path.join(this.repoDir, 'package.json'), JSON.stringify(pkg.node, null, '  '));
+        yield fs.writeFile(path.join(this.repoDir, 'package.json'), JSON.stringify(pkg.node, null, '  ') + '\n');
     }
     if (pkg.bower) {
-        yield fs.writeFile(path.join(this.repoDir, 'bower.json'), JSON.stringify(pkg.bower, null, '  '));
+        yield fs.writeFile(path.join(this.repoDir, 'bower.json'), JSON.stringify(pkg.bower, null, '  ' + '\n'));
     }
 }
 Git.prototype.writePkg = makeTask('writePkg', doWritePkg);
