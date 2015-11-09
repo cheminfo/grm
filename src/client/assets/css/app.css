@@ -1,4 +1,7 @@
 #main table {
-  border-collapse: collapse; }
+    border-collapse: collapse;
+}
+
 #main td {
-  padding-right: 5px; }
+    padding-right: 5px;
+}
