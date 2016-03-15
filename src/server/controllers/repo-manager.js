@@ -125,12 +125,17 @@ function*publish() {
 
         let releaseMessage = `Release v${version}`;
         yield git.publish(toAdd, releaseMessage);
+        
+        const commitID = yield git.getCurrentHEAD();
 
         debug('creating release');
         let repo = this.github.getRepo(this.state.owner, this.state.repo);
         let releaseInfo = yield repo.releases.create({
             tag_name: `v${version}`,
-            name: releaseMessage,
+            target_commitish: commitID,
+            name: `v${version}`,
+            body: releaseMessage,
+            draft: false,
             prerelease: this.query.bump.startsWith('pre')
         });
 

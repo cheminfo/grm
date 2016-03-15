@@ -79,6 +79,11 @@ function*doPublish(files, message) {
 }
 Git.prototype.publish = makeTask('publish', doPublish);
 
+Git.prototype.getCurrentHEAD = function*() {
+    debug(`getting current HEAD`);
+    return yield child_process.execFile('git', ['rev-parse', 'HEAD'], this.execOptions);
+};
+
 function*doNpmPublish() {
     try {
         debug('getting npm authors');
