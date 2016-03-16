@@ -81,7 +81,7 @@ Git.prototype.publish = makeTask('publish', doPublish);
 
 Git.prototype.getCurrentHEAD = function*() {
     debug(`getting current HEAD`);
-    return yield child_process.execFile('git', ['rev-parse', 'HEAD'], this.execOptions);
+    return yield child_process.execFile('git', ['rev-parse', 'HEAD'], this.execOptions)[0].toString().substring(0,40);
 };
 
 function*doNpmPublish() {
