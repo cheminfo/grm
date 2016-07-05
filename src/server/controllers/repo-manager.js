@@ -6,11 +6,11 @@ const debug = require('debug')('grm:repo');
 const path = require('path');
 const mkdirp = require('mkdirp-then');
 
-const config = require('../../../config.json');
-const cdnDir = path.resolve(config.dir.cdn);
+const config = require('config');
+const cdnDir = config.dir.cdn;
 
+const db = require('db');
 const Git = require('../util/git');
-const mongo = require('../util/mongo');
 
 const gitCache = {};
 
@@ -19,8 +19,6 @@ module.exports = function*() {
     let owner = this.state.owner = this.params.owner;
     let repo = this.state.repo = this.params.repo;
     this.state.fullName = `${owner}/${repo}`;
-
-    this.state.mongoRepo = mongo.collection('repos');
 
     let action = this.query.action;
     if (!action) {
@@ -50,11 +48,13 @@ module.exports = function*() {
 };
 
 function*getStatus() {
-    let status = yield this.state.mongoRepo.findOne({
+    const active = db.isActive(this.state.owner, this.state.repo);
+    let status = {
         owner: this.state.owner,
-        name: this.state.repo
-    });
-    if (status.active) {
+        name: this.state.repo,
+        active: active
+    };
+    if (active) {
         let git = getGit.call(this);
         let pkg = yield git.readPkg();
         status.version = pkg.node.version;
@@ -78,10 +78,8 @@ function*enable() {
     // invert the status
     status.active = !status.active;
     debug(`switching repo ${this.state.owner}/${this.state.repo} : ${status.active}`);
-    yield this.state.mongoRepo.findOne({
-        owner: this.state.owner,
-        name: this.state.repo
-    }).set('active', status.active);
+    db.setActive(this.state.owner, this.state.repo, status.active);
+    db.save();
     return status;
 }
 

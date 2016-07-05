@@ -26,7 +26,7 @@ export default React.createClass({
         if (force) {
             url += '?force=true';
         }
-        agent.get(url).end(res => {
+        agent.get(url).end((err, res) => {
             this.setState({
                 repos: res.body
             });

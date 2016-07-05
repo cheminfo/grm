@@ -8,8 +8,8 @@ const co = require('co');
 
 const debug = require('debug')('grm:git');
 
-const config = require('../../../config.json');
-const dataFolder = path.resolve(config.dir.git);
+const config = require('config');
+const dataFolder = config.dir.git;
 
 function Git(org, repo, OAuthToken) {
     this.org = org;

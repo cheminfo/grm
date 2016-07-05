@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import ReactDOM from 'react-dom';
 import Main from './main';
 
-React.render(<Main />, document.getElementById('main'));
+ReactDOM.render(<Main />, document.getElementById('main'));
