@@ -10,8 +10,6 @@ const config = require('config');
 const github = require('./util/github-api');
 const router = require('./router');
 
-const index = path.resolve(__dirname, '../client/index.html');
-
 module.exports = function (app) {
     const gh = github(config.oauth);
 
@@ -19,7 +17,8 @@ module.exports = function (app) {
 
     app.use(function*(next) {
         if (this.path === '/') {
-            yield send(this, index);
+            yield send(this, 'index.html', {root: __dirname + '/../client'});
+            console.log(this.body);
         } else {
             yield next;
         }
