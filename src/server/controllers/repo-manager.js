@@ -52,14 +52,14 @@ function*getStatus(forceDetails) {
     let status = {
         owner: this.state.owner,
         name: this.state.repo,
-        active: active,
-        version: '?'
+        active: active
     };
     if (active && (this.query.details || forceDetails)) {
         let git = getGit.call(this);
         let pkg = yield git.readPkg();
         status.version = pkg.node.version;
         status.npm = pkg.node.name;
+        status.desc = pkg.node.description
     }
     return status;
 }
@@ -75,6 +75,7 @@ function*enable() {
         }
         status.version = pkg.node.version;
         status.npm = pkg.node.name;
+        status.desc = pkg.node.description;
     }
     // invert the status
     status.active = !status.active;

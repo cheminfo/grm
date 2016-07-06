@@ -22011,7 +22011,8 @@ exports.default = _react2.default.createClass({
                     result = res.body;
                 } else {
                     result = {
-                        error: 'Error during release process: ' + res.text
+                        error: 'Error during release process',
+                        errorValue: res.text
                     };
                 }
                 result.locked = false;
@@ -22028,7 +22029,8 @@ exports.default = _react2.default.createClass({
                 locked: false
             };
             if (res.status !== 200) {
-                result.error = 'Error during HEAD build: ' + res.text;
+                result.error = 'Error during HEAD build';
+                result.errorValue = res.text;
             }
             _this5.setState(result);
         });
@@ -22042,7 +22044,8 @@ exports.default = _react2.default.createClass({
                 locked: false
             };
             if (res.status !== 200) {
-                result.error = 'Error during NPM publish: ' + res.text;
+                result.error = 'Error during npm publish';
+                result.errorValue = res.text;
             }
             _this6.setState(result);
         });
@@ -22050,7 +22053,8 @@ exports.default = _react2.default.createClass({
     lock: function lock() {
         this.setState({
             locked: true,
-            error: false
+            error: false,
+            errorValue: false
         });
     },
     render: function render() {
@@ -22080,7 +22084,7 @@ exports.default = _react2.default.createClass({
             var checked = active ? 'checked' : null;
             var locked = this.state.locked;
             if (active) {
-                var version = this.state.version;
+                var version = this.state.version || '?';
                 var name = this.props.repo.name;
                 var owner = this.props.repo.owner;
                 return _react2.default.createElement(
@@ -22102,7 +22106,7 @@ exports.default = _react2.default.createClass({
                         null,
                         _react2.default.createElement(
                             'strong',
-                            null,
+                            { title: this.state.desc || '' },
                             'v',
                             version
                         )
@@ -22156,7 +22160,11 @@ exports.default = _react2.default.createClass({
                     _react2.default.createElement(
                         'td',
                         null,
-                        this.state.error ? this.state.error : ''
+                        this.state.error ? _react2.default.createElement(
+                            'span',
+                            { title: this.state.errorValue },
+                            this.state.error
+                        ) : ''
                     )
                 );
             } else {

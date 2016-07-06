@@ -58,7 +58,8 @@ export default React.createClass({
                         result = res.body;
                     } else {
                         result = {
-                            error:`Error during release process: ${res.text}`
+                            error:`Error during release process`,
+                            errorValue: res.text
                         };
                     }
                     result.locked = false;
@@ -75,7 +76,8 @@ export default React.createClass({
                     locked: false
                 };
                 if (res.status !== 200) {
-                    result.error = `Error during HEAD build: ${res.text}`;
+                    result.error = `Error during HEAD build`;
+                    result.errorValue = res.text
                 }
                 this.setState(result);
             });
@@ -89,7 +91,8 @@ export default React.createClass({
                     locked: false
                 };
                 if (res.status !== 200) {
-                    result.error = `Error during NPM publish: ${res.text}`;
+                    result.error = 'Error during npm publish';
+                    result.errorValue = res.text;
                 }
                 this.setState(result);
             });
@@ -97,7 +100,8 @@ export default React.createClass({
     lock() {
         this.setState({
             locked: true,
-            error: false
+            error: false,
+            errorValue: false
         });
     },
     render() {
@@ -121,7 +125,7 @@ export default React.createClass({
             var checked = active ? 'checked' : null;
             var locked = this.state.locked;
             if (active) {
-                var version = this.state.version;
+                var version = this.state.version || '?';
                 var name = this.props.repo.name;
                 var owner = this.props.repo.owner;
                 return (
@@ -134,7 +138,7 @@ export default React.createClass({
                             {name}
                         </td>
                         <td>
-                            <strong>v{version}</strong>
+                            <strong title={this.state.desc || ''}>v{version}</strong>
                         </td>
                         <td>
                             <input type="button" value="patch"
@@ -163,7 +167,7 @@ export default React.createClass({
                                    onClick={this.getDetails} disabled={locked} />
                         </td>
                         <td>
-                            {this.state.error ? this.state.error : ''}
+                            {this.state.error ? <span title={this.state.errorValue}>{this.state.error}</span> : ''}
                         </td>
                     </tr>
                 );
