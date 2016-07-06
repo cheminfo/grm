@@ -14,7 +14,7 @@ export default React.createClass({
         };
     },
     componentWillMount() {
-        agent.get('username').end(res => {
+        agent.get('username').end((err, res) => {
             this.setState({
                 username: res.text
             });

@@ -2,7 +2,6 @@
 
 import React from 'react';
 import agent from 'superagent';
-import semver from 'semver';
 
 export default React.createClass({
     getInitialState() {
@@ -19,6 +18,15 @@ export default React.createClass({
                 if (this.isMounted()) {
                     this.setState(body);
                 }
+            });
+    },
+    getDetails() {
+        agent
+            .get(`repo/${this.props.repo.owner}/${this.props.repo.name}?action=status&details=true`)
+            .end((err, res) => {
+                var body = res.body;
+                body.loading = false;
+                this.setState(body);
             });
     },
     switchEnable() {
@@ -39,9 +47,7 @@ export default React.createClass({
             });
     },
     release(inc) {
-        var v = semver(this.state.version);
-        v.inc(inc);
-        var confirm = window.confirm(`Bump ${this.props.repo.name} to v${v.version}?`);
+        var confirm = window.confirm(`Bump ${this.props.repo.name} to the next ${inc}?`);
         if (confirm) {
             this.lock();
             agent
@@ -52,7 +58,7 @@ export default React.createClass({
                         result = res.body;
                     } else {
                         result = {
-                            error:'Error during release process'
+                            error:`Error during release process: ${res.text}`
                         };
                     }
                     result.locked = false;
@@ -69,7 +75,7 @@ export default React.createClass({
                     locked: false
                 };
                 if (res.status !== 200) {
-                    result.error = 'Error during HEAD build';
+                    result.error = `Error during HEAD build: ${res.text}`;
                 }
                 this.setState(result);
             });
@@ -83,7 +89,7 @@ export default React.createClass({
                     locked: false
                 };
                 if (res.status !== 200) {
-                    result.error = 'Error during NPM publish';
+                    result.error = `Error during NPM publish: ${res.text}`;
                 }
                 this.setState(result);
             });
@@ -116,13 +122,6 @@ export default React.createClass({
             var locked = this.state.locked;
             if (active) {
                 var version = this.state.version;
-                var sversion = semver(version);
-                sversion.inc('patch');
-                var patch = sversion.version;
-                sversion.inc('minor');
-                var minor = sversion.version;
-                sversion.inc('major');
-                var major = sversion.version;
                 var name = this.props.repo.name;
                 var owner = this.props.repo.owner;
                 return (
@@ -138,26 +137,30 @@ export default React.createClass({
                             <strong>v{version}</strong>
                         </td>
                         <td>
-                            <input type="button" value={patch}
-                                   onClick={this.release.bind(this, 'patch')} disabled={locked} />
-                            <input type="button" value={minor}
-                                   onClick={this.release.bind(this, 'minor')} disabled={locked} />
-                            <input type="button" value={major}
-                                   onClick={this.release.bind(this, 'major')} disabled={locked} />
+                            <input type="button" value="patch"
+                                   onClick={() => this.release('patch')} disabled={locked} />
+                            <input type="button" value="minor"
+                                   onClick={() => this.release('minor')} disabled={locked} />
+                            <input type="button" value="major"
+                                   onClick={() => this.release('major')} disabled={locked} />
                             &nbsp;<input type="button" value="HEAD"
                                          onClick={this.buildHead} disabled={locked} />
                             &nbsp;<input type="button" value="NPM"
                                    onClick={this.npmPublish} disabled={locked} />
                         </td>
                         <td>
-                            <a href={`https://www.npmjs.com/package/${this.state.npm}`}>
-                                <img src={`https://img.shields.io/npm/v/${this.state.npm}.svg?style=flat-square`} alt="npm package status" />
+                            <a href={`https://www.npmjs.com/package/${this.state.npm || ''}`}>
+                                <img src={`https://img.shields.io/npm/v/${this.state.npm || ''}.svg?style=flat-square`} alt="npm package status" />
                             </a>
                         </td>
                         <td>
                             <a href={`https://travis-ci.org/${owner}/${name}`}>
                                 <img src={`https://img.shields.io/travis/${owner}/${name}/master.svg?style=flat-square`} alt="build status" />
                             </a>
+                        </td>
+                        <td>
+                            <input type="button" value="details"
+                                   onClick={this.getDetails} disabled={locked} />
                         </td>
                         <td>
                             {this.state.error ? this.state.error : ''}

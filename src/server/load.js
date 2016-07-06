@@ -18,7 +18,6 @@ module.exports = function (app) {
     app.use(function*(next) {
         if (this.path === '/') {
             yield send(this, 'index.html', {root: __dirname + '/../client'});
-            console.log(this.body);
         } else {
             yield next;
         }

@@ -47,14 +47,15 @@ module.exports = function*() {
     }
 };
 
-function*getStatus() {
+function*getStatus(forceDetails) {
     const active = db.isActive(this.state.owner, this.state.repo);
     let status = {
         owner: this.state.owner,
         name: this.state.repo,
-        active: active
+        active: active,
+        version: '?'
     };
-    if (active) {
+    if (active && (this.query.details || forceDetails)) {
         let git = getGit.call(this);
         let pkg = yield git.readPkg();
         status.version = pkg.node.version;
@@ -116,14 +117,14 @@ function*publish() {
         try {
             yield fs.stat(path.join(git.repoDir, 'dist'));
             toAdd.push('dist/*');
-        } catch(e) {
+        } catch (e) {
             debug('dist does not exist, not adding it');
         }
 
 
         let releaseMessage = `Release v${version}`;
         yield git.publish(toAdd, releaseMessage);
-        
+
         const commitID = yield git.getCurrentHEAD();
 
         debug('creating release');
@@ -137,8 +138,8 @@ function*publish() {
             prerelease: this.query.bump.startsWith('pre')
         });
 
-        if(!buildFiles.length) {
-            return yield getStatus.call(this);
+        if (!buildFiles.length) {
+            return yield getStatus.call(this, true);
         }
         let cdnDir2 = path.join(cdnDir, pkg.node.name, version);
         yield mkdirp(cdnDir2);
@@ -156,42 +157,56 @@ function*publish() {
             }
             yield fs.writeFile(path.join(cdnDir2, name), file);
         }
-        return yield getStatus.call(this);
+        return yield getStatus.call(this, true);
     } catch (e) {
-        throw e; // TODO print error
+        console.error('publish error', e.stack);
+        this.status = 500;
+        return e.stack;
     }
 }
 
 function*npmPublish() {
     debug('start npm publish');
-    let git = getGit.call(this);
-    yield git.npmPublish();
-    return 'OK';
+    try {
+        let git = getGit.call(this);
+        yield git.npmPublish();
+        return 'OK';
+    } catch (e) {
+        console.error('publish error', e.stack);
+        this.status = 500;
+        return e.stack;
+    }
 }
 
 function*buildHead() {
     debug('building head');
-    let git = getGit.call(this);
+    try {
+        let git = getGit.call(this);
 
-    let pkg = yield git.readPkg();
-    if (!pkg.node) {
-        this.status = 500;
-        return 'No package.json';
-    }
+        let pkg = yield git.readPkg();
+        if (!pkg.node) {
+            this.status = 500;
+            return 'No package.json';
+        }
 
-    let buildFiles = yield git.build();
-    if(!buildFiles.length) {
+        let buildFiles = yield git.build();
+        if (!buildFiles.length) {
+            return 'OK';
+        }
+
+        let cdnDir2 = path.join(cdnDir, pkg.node.name, 'HEAD');
+        yield mkdirp(cdnDir2);
+        for (let i = 0; i < buildFiles.length; i++) {
+            let name = buildFiles[i].name;
+            let file = yield fs.readFile(buildFiles[i].path);
+            yield fs.writeFile(path.join(cdnDir2, name), file);
+        }
         return 'OK';
+    } catch (e) {
+        console.error('publish error', e.stack);
+        this.status = 500;
+        return e.stack;
     }
-
-    let cdnDir2 = path.join(cdnDir, pkg.node.name, 'HEAD');
-    yield mkdirp(cdnDir2);
-    for (let i = 0; i < buildFiles.length; i++) {
-        let name = buildFiles[i].name;
-        let file = yield fs.readFile(buildFiles[i].path);
-        yield fs.writeFile(path.join(cdnDir2, name), file);
-    }
-    return 'OK';
 }
 
 function getGit() {

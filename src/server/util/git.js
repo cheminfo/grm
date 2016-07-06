@@ -85,18 +85,14 @@ Git.prototype.getCurrentHEAD = function*() {
 };
 
 function*doNpmPublish() {
-    try {
-        debug('getting npm authors');
-        var authors = yield child_process.execFile('npm', ['author', 'ls'], this.execOptions);
-        var isAdmin = authors[0].includes('cheminfo-bot');
-        if (isAdmin) {
-            debug(`publishing on NPM`);
-            yield child_process.execFile('npm', ['publish'], this.execOptions);
-        } else {
-            debug('cheminfo-bot is not an admin')
-        }
-    } catch (e) {
-        throw new Error('NPM publish failed');
+    debug('getting npm authors');
+    var authors = yield child_process.execFile('npm', ['author', 'ls'], this.execOptions);
+    var isAdmin = authors[0].includes('cheminfo-bot');
+    if (isAdmin) {
+        debug(`publishing on npm`);
+        yield child_process.execFile('npm', ['publish'], this.execOptions);
+    } else {
+        throw new Error('cheminfo-bot is not allowed to publish this package');
     }
 }
 Git.prototype.npmPublish = makeTask('npmPublish', doNpmPublish);
