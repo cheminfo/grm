@@ -125,6 +125,7 @@ export default React.createClass({
             var checked = active ? 'checked' : null;
             var locked = this.state.locked;
             if (active) {
+                var hasVersion = !!this.state.version;
                 var version = this.state.version || '?';
                 var name = this.props.repo.name;
                 var owner = this.props.repo.owner;
@@ -152,16 +153,24 @@ export default React.createClass({
                             &nbsp;<input type="button" value="NPM"
                                    onClick={this.npmPublish} disabled={locked} />
                         </td>
-                        <td>
-                            <a href={`https://www.npmjs.com/package/${this.state.npm || ''}`}>
-                                <img src={`https://img.shields.io/npm/v/${this.state.npm || ''}.svg?style=flat-square`} alt="npm package status" />
-                            </a>
-                        </td>
-                        <td>
-                            <a href={`https://travis-ci.org/${owner}/${name}`}>
-                                <img src={`https://img.shields.io/travis/${owner}/${name}/master.svg?style=flat-square`} alt="build status" />
-                            </a>
-                        </td>
+                        {
+                            hasVersion ? (
+                                <td>
+                                    <a href={`https://www.npmjs.com/package/${this.state.npm || ''}`}>
+                                        <img src={`https://img.shields.io/npm/v/${this.state.npm || ''}.svg?style=flat-square`} alt="npm package status" />
+                                    </a>
+                                </td>
+                            ) : ''
+                        }
+                        {
+                            hasVersion ? (
+                                <td>
+                                    <a href={`https://travis-ci.org/${owner}/${name}`}>
+                                        <img src={`https://img.shields.io/travis/${owner}/${name}/master.svg?style=flat-square`} alt="build status" />
+                                    </a>
+                                </td>
+                            ) : ''
+                        }
                         <td>
                             <input type="button" value="details"
                                    onClick={this.getDetails} disabled={locked} />
