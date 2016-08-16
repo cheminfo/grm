@@ -22425,7 +22425,7 @@ exports.default = _react2.default.createClass({
         var _this2 = this;
 
         this.lock();
-        _superagent2.default.get('repo/' + this.state.owner + '/' + this.state.name + '?action=enable').end(function (err, res) {
+        _superagent2.default.get('repo/' + this.props.repo.owner + '/' + this.props.repo.name + '?action=enable').end(function (err, res) {
             var result;
             if (res.status === 200) {
                 result = res.body;
@@ -22444,7 +22444,7 @@ exports.default = _react2.default.createClass({
         var confirm = window.confirm('Bump ' + this.props.repo.name + ' to the next ' + inc + '?');
         if (confirm) {
             this.lock();
-            _superagent2.default.get('repo/' + this.state.owner + '/' + this.state.name + '?action=publish&bump=' + inc).end(function (err, res) {
+            _superagent2.default.get('repo/' + this.props.repo.owner + '/' + this.props.repo.name + '?action=publish&bump=' + inc).end(function (err, res) {
                 var result;
                 if (res.status === 200) {
                     result = res.body;
@@ -22463,7 +22463,7 @@ exports.default = _react2.default.createClass({
         var _this4 = this;
 
         this.lock();
-        _superagent2.default.get('repo/' + this.state.owner + '/' + this.state.name + '?action=head').end(function (err, res) {
+        _superagent2.default.get('repo/' + this.props.repo.owner + '/' + this.props.repo.name + '?action=head').end(function (err, res) {
             var result = {
                 locked: false
             };
@@ -22478,7 +22478,7 @@ exports.default = _react2.default.createClass({
         var _this5 = this;
 
         this.lock();
-        _superagent2.default.get('repo/' + this.state.owner + '/' + this.state.name + '?action=npm').end(function (err, res) {
+        _superagent2.default.get('repo/' + this.props.repo.owner + '/' + this.props.repo.name + '?action=npm').end(function (err, res) {
             var result = {
                 locked: false
             };

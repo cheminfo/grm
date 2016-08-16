@@ -19,7 +19,7 @@ export default React.createClass({
     switchEnable() {
         this.lock();
         agent
-            .get(`repo/${this.state.owner}/${this.state.name}?action=enable`)
+            .get(`repo/${this.props.repo.owner}/${this.props.repo.name}?action=enable`)
             .end((err, res) => {
                 var result;
                 if (res.status === 200) {
@@ -38,7 +38,7 @@ export default React.createClass({
         if (confirm) {
             this.lock();
             agent
-                .get(`repo/${this.state.owner}/${this.state.name}?action=publish&bump=${inc}`)
+                .get(`repo/${this.props.repo.owner}/${this.props.repo.name}?action=publish&bump=${inc}`)
                 .end((err, res) => {
                     var result;
                     if (res.status === 200) {
@@ -57,7 +57,7 @@ export default React.createClass({
     buildHead() {
         this.lock();
         agent
-            .get(`repo/${this.state.owner}/${this.state.name}?action=head`)
+            .get(`repo/${this.props.repo.owner}/${this.props.repo.name}?action=head`)
             .end((err, res) => {
                 var result = {
                     locked: false
@@ -72,7 +72,7 @@ export default React.createClass({
     npmPublish() {
         this.lock();
         agent
-            .get(`repo/${this.state.owner}/${this.state.name}?action=npm`)
+            .get(`repo/${this.props.repo.owner}/${this.props.repo.name}?action=npm`)
             .end((err, res) => {
                 var result = {
                     locked: false
