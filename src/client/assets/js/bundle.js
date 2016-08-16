@@ -22411,32 +22411,18 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 exports.default = _react2.default.createClass({
     displayName: 'repository',
     getInitialState: function getInitialState() {
-        return {
-            loading: true
-        };
-    },
-    componentDidMount: function componentDidMount() {
-        var _this = this;
-
-        _superagent2.default.get('repo/' + this.props.repo.owner + '/' + this.props.repo.name + '?action=status').end(function (err, res) {
-            var body = res.body;
-            body.loading = false;
-            if (_this.isMounted()) {
-                _this.setState(body);
-            }
-        });
+        return {};
     },
     getDetails: function getDetails() {
-        var _this2 = this;
+        var _this = this;
 
         _superagent2.default.get('repo/' + this.props.repo.owner + '/' + this.props.repo.name + '?action=status&details=true').end(function (err, res) {
             var body = res.body;
-            body.loading = false;
-            _this2.setState(body);
+            _this.setState(body);
         });
     },
     switchEnable: function switchEnable() {
-        var _this3 = this;
+        var _this2 = this;
 
         this.lock();
         _superagent2.default.get('repo/' + this.state.owner + '/' + this.state.name + '?action=enable').end(function (err, res) {
@@ -22449,11 +22435,11 @@ exports.default = _react2.default.createClass({
                 };
             }
             result.locked = false;
-            _this3.setState(result);
+            _this2.setState(result);
         });
     },
     release: function release(inc) {
-        var _this4 = this;
+        var _this3 = this;
 
         var confirm = window.confirm('Bump ' + this.props.repo.name + ' to the next ' + inc + '?');
         if (confirm) {
@@ -22469,12 +22455,12 @@ exports.default = _react2.default.createClass({
                     };
                 }
                 result.locked = false;
-                _this4.setState(result);
+                _this3.setState(result);
             });
         }
     },
     buildHead: function buildHead() {
-        var _this5 = this;
+        var _this4 = this;
 
         this.lock();
         _superagent2.default.get('repo/' + this.state.owner + '/' + this.state.name + '?action=head').end(function (err, res) {
@@ -22485,11 +22471,11 @@ exports.default = _react2.default.createClass({
                 result.error = 'Error during HEAD build';
                 result.errorValue = res.text;
             }
-            _this5.setState(result);
+            _this4.setState(result);
         });
     },
     npmPublish: function npmPublish() {
-        var _this6 = this;
+        var _this5 = this;
 
         this.lock();
         _superagent2.default.get('repo/' + this.state.owner + '/' + this.state.name + '?action=npm').end(function (err, res) {
@@ -22500,7 +22486,7 @@ exports.default = _react2.default.createClass({
                 result.error = 'Error during npm publish';
                 result.errorValue = res.text;
             }
-            _this6.setState(result);
+            _this5.setState(result);
         });
     },
     lock: function lock() {
@@ -22511,133 +22497,116 @@ exports.default = _react2.default.createClass({
         });
     },
     render: function render() {
-        var _this7 = this;
+        var _this6 = this;
 
-        var active = this.state.active;
+        var active = this.props.repo.active;
         if (!this.props.visible && !active) {
             return _react2.default.createElement('tr', null);
         }
-        if (this.state.loading) {
+
+        var checked = active ? 'checked' : null;
+        var locked = this.state.locked;
+        if (active) {
+            var hasVersion = !!this.state.version;
+            var version = this.state.version || '?';
+            var name = this.props.repo.name;
+            var owner = this.props.repo.owner;
             return _react2.default.createElement(
                 'tr',
                 null,
-                _react2.default.createElement('td', null),
                 _react2.default.createElement(
                     'td',
                     null,
-                    this.props.repo.name
+                    _react2.default.createElement('input', { type: 'checkbox', checked: checked, disabled: locked,
+                        onChange: this.switchEnable })
                 ),
                 _react2.default.createElement(
                     'td',
                     null,
-                    'loading...'
+                    name
+                ),
+                _react2.default.createElement(
+                    'td',
+                    null,
+                    _react2.default.createElement(
+                        'strong',
+                        { title: this.state.desc || '' },
+                        'v',
+                        version
+                    )
+                ),
+                _react2.default.createElement(
+                    'td',
+                    null,
+                    _react2.default.createElement('input', { type: 'button', value: 'patch',
+                        onClick: function onClick() {
+                            return _this6.release('patch');
+                        }, disabled: locked }),
+                    _react2.default.createElement('input', { type: 'button', value: 'minor',
+                        onClick: function onClick() {
+                            return _this6.release('minor');
+                        }, disabled: locked }),
+                    _react2.default.createElement('input', { type: 'button', value: 'major',
+                        onClick: function onClick() {
+                            return _this6.release('major');
+                        }, disabled: locked }),
+                    ' ',
+                    _react2.default.createElement('input', { type: 'button', value: 'HEAD',
+                        onClick: this.buildHead, disabled: locked }),
+                    ' ',
+                    _react2.default.createElement('input', { type: 'button', value: 'NPM',
+                        onClick: this.npmPublish, disabled: locked })
+                ),
+                hasVersion ? _react2.default.createElement(
+                    'td',
+                    null,
+                    _react2.default.createElement(
+                        'a',
+                        { href: 'https://www.npmjs.com/package/' + (this.state.npm || '') },
+                        _react2.default.createElement('img', { src: 'https://img.shields.io/npm/v/' + (this.state.npm || '') + '.svg?style=flat-square', alt: 'npm package status' })
+                    )
+                ) : '',
+                hasVersion ? _react2.default.createElement(
+                    'td',
+                    null,
+                    _react2.default.createElement(
+                        'a',
+                        { href: 'https://travis-ci.org/' + owner + '/' + name },
+                        _react2.default.createElement('img', { src: 'https://img.shields.io/travis/' + owner + '/' + name + '/master.svg?style=flat-square', alt: 'build status' })
+                    )
+                ) : '',
+                _react2.default.createElement(
+                    'td',
+                    null,
+                    _react2.default.createElement('input', { type: 'button', value: 'details',
+                        onClick: this.getDetails, disabled: locked })
+                ),
+                _react2.default.createElement(
+                    'td',
+                    null,
+                    this.state.error ? _react2.default.createElement(
+                        'span',
+                        { title: this.state.errorValue },
+                        this.state.error
+                    ) : ''
                 )
             );
         } else {
-            var checked = active ? 'checked' : null;
-            var locked = this.state.locked;
-            if (active) {
-                var hasVersion = !!this.state.version;
-                var version = this.state.version || '?';
-                var name = this.props.repo.name;
-                var owner = this.props.repo.owner;
-                return _react2.default.createElement(
-                    'tr',
+            return _react2.default.createElement(
+                'tr',
+                null,
+                _react2.default.createElement(
+                    'td',
                     null,
-                    _react2.default.createElement(
-                        'td',
-                        null,
-                        _react2.default.createElement('input', { type: 'checkbox', checked: checked, disabled: locked,
-                            onChange: this.switchEnable })
-                    ),
-                    _react2.default.createElement(
-                        'td',
-                        null,
-                        name
-                    ),
-                    _react2.default.createElement(
-                        'td',
-                        null,
-                        _react2.default.createElement(
-                            'strong',
-                            { title: this.state.desc || '' },
-                            'v',
-                            version
-                        )
-                    ),
-                    _react2.default.createElement(
-                        'td',
-                        null,
-                        _react2.default.createElement('input', { type: 'button', value: 'patch',
-                            onClick: function onClick() {
-                                return _this7.release('patch');
-                            }, disabled: locked }),
-                        _react2.default.createElement('input', { type: 'button', value: 'minor',
-                            onClick: function onClick() {
-                                return _this7.release('minor');
-                            }, disabled: locked }),
-                        _react2.default.createElement('input', { type: 'button', value: 'major',
-                            onClick: function onClick() {
-                                return _this7.release('major');
-                            }, disabled: locked }),
-                        ' ',
-                        _react2.default.createElement('input', { type: 'button', value: 'HEAD',
-                            onClick: this.buildHead, disabled: locked }),
-                        ' ',
-                        _react2.default.createElement('input', { type: 'button', value: 'NPM',
-                            onClick: this.npmPublish, disabled: locked })
-                    ),
-                    hasVersion ? _react2.default.createElement(
-                        'td',
-                        null,
-                        _react2.default.createElement(
-                            'a',
-                            { href: 'https://www.npmjs.com/package/' + (this.state.npm || '') },
-                            _react2.default.createElement('img', { src: 'https://img.shields.io/npm/v/' + (this.state.npm || '') + '.svg?style=flat-square', alt: 'npm package status' })
-                        )
-                    ) : '',
-                    hasVersion ? _react2.default.createElement(
-                        'td',
-                        null,
-                        _react2.default.createElement(
-                            'a',
-                            { href: 'https://travis-ci.org/' + owner + '/' + name },
-                            _react2.default.createElement('img', { src: 'https://img.shields.io/travis/' + owner + '/' + name + '/master.svg?style=flat-square', alt: 'build status' })
-                        )
-                    ) : '',
-                    _react2.default.createElement(
-                        'td',
-                        null,
-                        _react2.default.createElement('input', { type: 'button', value: 'details',
-                            onClick: this.getDetails, disabled: locked })
-                    ),
-                    _react2.default.createElement(
-                        'td',
-                        null,
-                        this.state.error ? _react2.default.createElement(
-                            'span',
-                            { title: this.state.errorValue },
-                            this.state.error
-                        ) : ''
-                    )
-                );
-            } else {
-                return _react2.default.createElement(
-                    'tr',
+                    _react2.default.createElement('input', { type: 'checkbox', checked: checked, disabled: locked,
+                        onChange: this.switchEnable })
+                ),
+                _react2.default.createElement(
+                    'td',
                     null,
-                    _react2.default.createElement(
-                        'td',
-                        null,
-                        _react2.default.createElement('input', { type: 'checkbox', checked: checked, disabled: locked,
-                            onChange: this.switchEnable })
-                    ),
-                    _react2.default.createElement(
-                        'td',
-                        null,
-                        this.props.repo.name
-                    )
-                );
-            }
+                    this.props.repo.name
+                )
+            );
         }
     }
 });
