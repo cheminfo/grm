@@ -52,7 +52,11 @@ Git.prototype.pull = makeTask('pull', pullRepo);
 function*doBuild() {
     yield this.pull();
     debug('building project');
-    yield child_process.execFile('yarn', ['upgrade'], this.execOptions);
+    if (yield fs.exists(path.join(this.execOptions.cwd, 'yarn.lock'))) {
+        yield child_process.execFile('yarn', ['upgrade'], this.execOptions);
+    } else {
+        yield child_process.execFile('yarn', ['install'], this.execOptions);
+    }
     yield child_process.execFile('npm', ['run', 'build'], this.execOptions);
     debug('build finished, getting list of files');
     try {
