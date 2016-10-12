@@ -44,6 +44,7 @@ function*pullRepo(reset) {
     debug('pulling from GitHub');
     if (reset) {
         yield child_process.execFile('git', ['reset', '--hard', 'origin/master'], this.execOptions);
+        yield child_process.execFile('git', ['clean', '-fd'], this.execOptions);
     }
     yield child_process.execFile('git', ['pull'], this.execOptions);
 }
