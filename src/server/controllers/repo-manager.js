@@ -1,6 +1,7 @@
 'use strict';
 
 const semver = require('semver');
+const cp = require('mz/child_process');
 const fs = require('mz/fs');
 const debug = require('debug')('grm:repo');
 const path = require('path');
@@ -115,13 +116,15 @@ function*publish() {
         yield git.writePkg(pkg);
         let buildFiles = yield git.build();
 
-        try {
-            yield fs.stat(path.join(git.repoDir, 'dist'));
-            toAdd.push('dist/*');
-        } catch (e) {
-            debug('dist does not exist, not adding it');
+        var distTracked = yield isDistTracked(git.repoDir)
+        if (pkg.bower || distTracked) {
+            try {
+                yield fs.stat(path.join(git.repoDir, 'dist'));
+                toAdd.push('dist/*');
+            } catch (e) {
+                debug('dist does not exist, not adding it');
+            }
         }
-
 
         let releaseMessage = `Release v${version}`;
         yield git.publish(toAdd, releaseMessage);
@@ -212,4 +215,12 @@ function*buildHead() {
 
 function getGit() {
     return gitCache[this.state.fullName] || (gitCache[this.state.fullName] = new Git(encodeURIComponent(this.state.owner), encodeURIComponent(this.state.repo), this.token));
+}
+
+function* isDistTracked(repoDir) {
+    let result = yield cp.execFile('git', ['status', 'dist', '--porcelain'], {cwd: repoDir});
+    result = result.toString();
+    if (!result.includes('dist')) return false; // dist may be in .gitignore
+    if (result.includes('?? dist/\n')) return false; // dist is completely untracked
+    return true;
 }
