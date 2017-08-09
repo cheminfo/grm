@@ -135,6 +135,25 @@ function*doWritePkg(pkg) {
 }
 Git.prototype.writePkg = makeTask('writePkg', doWritePkg);
 
+function*doWritePkgLock(version) {
+    debug('writing package-lock file');
+    let packagePath = path.join(this.repoDir, 'package-lock.json');
+    let packageLock;
+    if (yield fs.exists(packagePath)) {
+        packageLock = JSON.parse(yield fs.readFile(packagePath, 'utf-8'));
+        debug('found package-lock.json');
+    }
+
+    if (packageLock) {
+        packageLock.version = version;
+        yield fs.writeFile(packagePath, JSON.stringify(packageLock, null, '  ') + '\n');
+        return true;
+    }
+
+    return false;
+}
+Git.prototype.writePkgLock = makeTask('writePkg', doWritePkgLock);
+
 Git.prototype.task = function (name, executor, onlyOnce, args) {
     let task = this.tasks[name];
     if (task) {
