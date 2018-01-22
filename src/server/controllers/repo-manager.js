@@ -115,10 +115,10 @@ function*publish() {
 
         yield git.writePkg(pkg);
 
+        let buildFiles = yield git.build();
         if (yield git.writePkgLock(version)) {
             toAdd.push('package-lock.json');
         }
-        let buildFiles = yield git.build();
 
         var distTracked = yield isDistTracked(git.repoDir);
         if (pkg.bower || distTracked) {
