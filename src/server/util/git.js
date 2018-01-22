@@ -58,6 +58,11 @@ function*doBuild() {
     } else {
         yield child_process.execFile('npm', ['install'], this.execOptions);
         yield child_process.execFile('npm', ['update'], this.execOptions);
+        try {
+            yield child_process.execFile('git', ['checkout', 'package-lock.json'], this.execOptions);
+        } catch (e) {
+            // ignore
+        }
     }
     yield child_process.execFile('npm', ['run', 'build'], this.execOptions);
     debug('build finished, getting list of files');
