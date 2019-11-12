@@ -45,9 +45,16 @@ function* pullRepo(reset) {
   yield this.init();
   debug('pulling from GitHub');
   if (reset) {
+    const currentBranch = (yield child_process.execFile(
+      'git',
+      ['rev-parse', '--abbrev-ref', 'HEAD'],
+      this.execOptions,
+    ))
+      .toString()
+      .trim();
     yield child_process.execFile(
       'git',
-      ['reset', '--hard', 'origin/master'],
+      ['reset', '--hard', `origin/${currentBranch}`],
       this.execOptions,
     );
     yield child_process.execFile('git', ['clean', '-fd'], this.execOptions);
