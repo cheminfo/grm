@@ -3,7 +3,7 @@
 const mkdirp = require('mkdirp');
 const path = require('path');
 
-const config = require('../../../config.json');
+const config = require('../../config.json');
 
 if (!config.oauth) throw new Error('config.oauth is missing');
 if (!config.dir || !config.dir.cdn || !config.dir.git)
