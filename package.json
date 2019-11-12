@@ -50,5 +50,12 @@
     "react": "^15.3.0",
     "react-dom": "^15.3.0",
     "watchify": "^3.7.0"
+  },
+  "prettier": {
+    "arrowParens": "always",
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "all"
   }
 }

@@ -16,17 +16,20 @@ require('./src/server/load')(app);
 
 const httpServer = http.createServer(app.callback());
 const httpPort = config.port || 3000;
-httpServer.listen(httpPort, function () {
-    debug(`app listening on HTTP port ${httpPort}`);
+httpServer.listen(httpPort, function() {
+  debug(`app listening on HTTP port ${httpPort}`);
 });
 
 if (config.ssl) {
-    const httpsServer = https.createServer({
-        key: fs.readFileSync(config.ssl.key),
-        cert: fs.readFileSync(config.ssl.cert)
-    }, app.callback());
-    const httpsPort = config.ssl.port || 3001;
-    httpsServer.listen(httpsPort, function () {
-        debug(`app listening on HTTPS port ${httpsPort}`);
-    });
+  const httpsServer = https.createServer(
+    {
+      key: fs.readFileSync(config.ssl.key),
+      cert: fs.readFileSync(config.ssl.cert),
+    },
+    app.callback(),
+  );
+  const httpsPort = config.ssl.port || 3001;
+  httpsServer.listen(httpsPort, function() {
+    debug(`app listening on HTTPS port ${httpsPort}`);
+  });
 }
